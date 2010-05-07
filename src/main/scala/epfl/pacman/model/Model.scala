@@ -4,14 +4,14 @@ package scala.epfl.pacman.model
 object Default {
     val monsters: Set[Monster] = {
         Set() +
-        Monster(Position(1,1), Right) +
-        Monster(Position(28,1), Left) +
-        Monster(Position(28,18), Left) +
-        Monster(Position(1,18), Right)
+        Monster(new Position(1,1), Right) +
+        Monster(new Position(28,1), Left) +
+        Monster(new Position(28,18), Left) +
+        Monster(new Position(1,18), Right)
 
     }
     val maze: Set[Wall] = {
-        def w(x: Int, y: Int) = Wall(Position(x,y))
+        def w(x: Int, y: Int) = Wall(new Position(x,y))
 
         // Default maze, *ouch*
         Set() ++
@@ -76,7 +76,7 @@ case class Model(val pacman: Pacman, val monsters: Set[Monster], val walls: Set[
         map
     }
 
-    def this() = this(new Pacman(Position(14, 10), Right), Default.monsters, Default.maze)
+    def this() = this(new Pacman(new Position(14, 10), Right), Default.monsters, Default.maze)
 
 
     def isWallAt(pos: Position) = objectsByPos.get(pos) match {

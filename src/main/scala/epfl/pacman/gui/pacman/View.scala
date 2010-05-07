@@ -65,8 +65,10 @@ class View(initModel: Model) {
         board.repaint()
     }
 
-    def absPos(p: Position): Position =
-        Position(p.x*blockWidth+border, p.y*blockHeight+border)
+    case class AbsolutePosition(x: Int, y: Int)
+
+    def absPos(p: Position): AbsolutePosition =
+        AbsolutePosition(p.x*blockWidth+border, p.y*blockHeight+border)
 
 
     def drawPacman(p: Pacman, g: Graphics2D) = {
