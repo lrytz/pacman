@@ -1,15 +1,29 @@
-package epfl.pacman
+package scala.epfl.pacman
 
-/**
- * Created by IntelliJ IDEA.
- * User: dubochet
- * Date: 06-May-2010
- * Time: 16:06:48
- * To change this template use File | Settings | File Templates.
- */
+import model._
+import gui.pacman.View
 
-object Main extends Application {
+object Main {
+    val rnd = new scala.util.Random(System.currentTimeMillis)
 
-  println("I am PacMan!")
+    def main(args: Array[String]): Unit = {
+        var model = new Model()
+
+        var pacman = model.pacman
+
+        val v = new View(model)
+
+        println("asd");
+        Thread.sleep(1000);
+        pacman = pacman.move(pacman.pos.onLeft)
+        v.repaint(model.copy(pacman = pacman))
+        Thread.sleep(1000);
+        pacman = pacman.move(pacman.pos.onLeft)
+        v.repaint(model.copy(pacman = pacman))
+        Thread.sleep(1000);
+        pacman = pacman.move(pacman.pos.onLeft)
+        v.repaint(model.copy(pacman = pacman))
+        println("asd");
+    }
 
 }
