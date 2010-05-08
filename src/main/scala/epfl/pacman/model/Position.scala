@@ -1,4 +1,4 @@
-package scala.epfl.pacman.model
+package epfl.pacman.model
 
 sealed class Position(val x: Int, val y: Int) {
     override def toString = "("+x+","+y+")"

@@ -1,11 +1,11 @@
-package scala.epfl.pacman.gui.pacman
+package epfl.pacman.gui.pacman
 
 import javax.swing.{JComponent, JFrame}
 import javax.imageio.ImageIO
 import java.io.File
 import java.awt.{Graphics, Graphics2D, Color, Dimension}
 
-import scala.epfl.pacman.model._
+import epfl.pacman.model._
 
 class View(initModel: Model) {
     object Settings {

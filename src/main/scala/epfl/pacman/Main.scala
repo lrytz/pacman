@@ -1,4 +1,4 @@
-package scala.epfl.pacman
+package epfl.pacman
 
 import model._
 import gui.pacman.View

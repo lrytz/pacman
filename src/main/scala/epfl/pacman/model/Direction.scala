@@ -1,4 +1,4 @@
-package scala.epfl.pacman.model
+package epfl.pacman.model
 
 sealed abstract class Direction
 

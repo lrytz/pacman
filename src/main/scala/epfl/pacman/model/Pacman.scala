@@ -1,4 +1,4 @@
-package scala.epfl.pacman.model
+package epfl.pacman.model
 
 case class Pacman(p: Position, d: Direction) extends MovingObject(p, d) {
     def move(p: Position) = {
