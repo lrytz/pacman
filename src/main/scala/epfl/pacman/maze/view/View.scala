@@ -1,11 +1,11 @@
-package epfl.pacman.gui.pacman
+package epfl.pacman.maze.view
 
 import javax.swing.{JComponent, JFrame}
 import javax.imageio.ImageIO
 import java.io.File
 import java.awt.{Graphics, Graphics2D, Color, Dimension}
 
-import epfl.pacman.model._
+import epfl.pacman.maze.model._
 
 class View(initModel: Model) {
     object Settings {

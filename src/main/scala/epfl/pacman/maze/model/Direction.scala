@@ -1,4 +1,4 @@
-package epfl.pacman.model
+package epfl.pacman.maze.model
 
 sealed abstract class Direction
 

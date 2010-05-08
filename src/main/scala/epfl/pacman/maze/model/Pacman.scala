@@ -1,4 +1,4 @@
-package epfl.pacman.model
+package epfl.pacman.maze.model
 
 case class Pacman(p: Position, d: Direction) extends MovingObject(p, d) {
     def move(p: Position) = {

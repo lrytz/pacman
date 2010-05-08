@@ -1,7 +1,7 @@
 package epfl.pacman
 
-import model._
-import gui.pacman.View
+import maze.model._
+import maze.view._
 
 object Main {
     val rnd = new scala.util.Random(System.currentTimeMillis)

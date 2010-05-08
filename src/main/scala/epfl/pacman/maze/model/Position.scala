@@ -1,4 +1,4 @@
-package epfl.pacman.model
+package epfl.pacman.maze.model
 
 sealed class Position(val x: Int, val y: Int) {
     override def toString = "("+x+","+y+")"
