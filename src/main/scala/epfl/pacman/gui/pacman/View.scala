@@ -127,7 +127,7 @@ class View(initModel: Model) {
         }
     }
 
-    val image = ImageIO.read(new File("resources/badguy1.png"))
+    val image = ImageIO.read(new File("src/main/resources/badguy1.png"))
 
     def drawMonster(m: Monster, g: Graphics2D) = {
         g.drawImage(image, absPos(m.pos).x, absPos(m.pos).y+2, null)
