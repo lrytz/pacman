@@ -1,30 +1,43 @@
 package epfl.pacman.maze.model
 
-sealed class Position(val x: Int, val y: Int) {
-    override def toString = "("+x+","+y+")"
+import epfl.pacman.Settings
 
-    def onTop    = new Position(x, y-1)
-    def onBottom = new Position(x, y+1)
-    def onLeft   = new Position(x-1, y)
-    def onRight  = new Position(x+1, y)
-    
-    override def hashCode = x + y
+sealed abstract class
+Position {
+  val x: Int
+  val y: Int
 
-    override def equals(v: Any) = (this, v) match {
-        case (t: HighResPosition, v: HighResPosition) =>
-            t.x == v.x && t.y == v.y &&
-            t.offsetx == v.offsetx && t.offsety == v.offsety
-        case (t: HighResPosition, v: Position) =>
-            t.x == v.x && t.y == v.y &&
-            t.offsetx == 0 && t.offsety == 0
-        case (t: Position, v: HighResPosition) =>
-            t.x == v.x && t.y == v.y &&
-            0 == v.offsetx && 0 == v.offsety
-        case (t: Position, v: Position) =>
-            t.x == v.x && t.y == v.y
-        case _ => false
-    }
+  def onTop    = new BlockPosition(x, y-1)
+  def onLeft   = new BlockPosition(x-1, y)
+  def onBottom = new BlockPosition(x, y+1)
+  def onRight  = new BlockPosition(x+1, y)
 
+  def nextIn(dir: Direction) = dir match {
+    case Up    => onTop
+    case Left  => onLeft
+    case Down  => onBottom
+    case Right => onRight
+  }
+
+  override def hashCode = x + y
+
+  override def equals(other: Any) = other match {
+    case pos: Position => x == pos.x && y == pos.y
+    case _ => false
+  }
 }
 
-class HighResPosition(override val x: Int, override val y: Int, val offsetx: Int, val offsety: Int) extends Position(x, y)
+case class BlockPosition(val x: Int, val y: Int) extends Position
+
+case class OffsetPosition(val x: Int, val y: Int, var xo: Int = 0, var yo: Int = 0) extends Position {
+  def overlaps(other: OffsetPosition) = {
+    val selfX = x * Settings.blockSize + xo
+    val selfY = y * Settings.blockSize + yo
+
+    val otherX = other.x * Settings.blockSize + other.xo
+    val otherY = other.y * Settings.blockSize + other.yo
+
+    (math.abs(selfX - otherX) < Settings.overlapThreshold) &&
+    (math.abs(selfY - otherY) < Settings.overlapThreshold)
+  }
+}

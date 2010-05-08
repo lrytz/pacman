@@ -2,17 +2,14 @@ package epfl.pacman
 package interface
 
 import swing._
+import event.ButtonClicked
 import java.awt.{Color, Insets}
 
-class Pacman(mazeView: maze.view.View) extends SimpleSwingApplication {
+class PacmanApp(mazeView: maze.view.View) extends SimpleSwingApplication {
 
-  object Settings {
-    val docWidth = 200
-    val codeWidth = 200
-
-    val width = 10 + docWidth + 10 + codeWidth + 10 + mazeView.Settings.width + 10
-    val height = mazeView.Settings.height
-  }
+  // not used right now, but this is what they should be...
+  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + mazeView.width + 10
+  val height = mazeView.height
 
   def top = new MainFrame {
     title = "Scala Pacman"
@@ -26,7 +23,7 @@ class Pacman(mazeView: maze.view.View) extends SimpleSwingApplication {
 
       val doc = new TextArea()
       c.fill = Fill.Both
-      c.ipadx = Settings.docWidth
+      c.ipadx = Settings.docTextWidth
       c.gridheight = 3
       c.gridx = 0
       c.gridy = 0
@@ -36,7 +33,7 @@ class Pacman(mazeView: maze.view.View) extends SimpleSwingApplication {
 
       val code = new TextArea()
       c.fill = Fill.Both
-      c.ipadx = Settings.codeWidth
+      c.ipadx = Settings.codeTextWidth
       c.gridheight = 1
       c.gridx = 1
       c.gridy = 0
@@ -52,7 +49,7 @@ class Pacman(mazeView: maze.view.View) extends SimpleSwingApplication {
       c.insets = new Insets(5, 5, 0, 5)
       layout(runButton) = c
 
-      val pauseButton = new Button("Pause...")
+      val pauseButton = new Button("Arreter...")
       c.fill = Fill.Horizontal
       c.gridx = 1
       c.gridy = 2
