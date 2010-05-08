@@ -1,10 +1,10 @@
 package epfl.pacman
 package maze.view
 
-import javax.swing.JComponent //, JFrame}
+import javax.swing.JComponent
 import javax.imageio.ImageIO
 import java.io.File
-import java.awt.{Graphics, Graphics2D, Color } // , Dimension}
+import java.awt.{Graphics, Graphics2D, Color }
 import swing._
 import maze.model._
 
@@ -42,7 +42,7 @@ class View(var model: Model) extends Component {
     val radius = blockSize/2 - 5
     val centerX = toAbs(p.pos.x, p.pos.xo) + blockSize/2
     val centerY = toAbs(p.pos.y, p.pos.yo) + blockSize/2
-println(centerX)
+
     val angle = 30
 
     val startAngle = p.dir match {

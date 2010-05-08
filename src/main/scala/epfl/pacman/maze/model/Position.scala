@@ -2,8 +2,7 @@ package epfl.pacman.maze.model
 
 import epfl.pacman.Settings
 
-sealed abstract class
-Position {
+sealed abstract class Position {
   val x: Int
   val y: Int
 
