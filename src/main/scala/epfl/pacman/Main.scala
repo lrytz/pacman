@@ -10,6 +10,7 @@ object Main {
         var model = new Model()
 
         val v = new View(model)
+      new interface.Pacman(v).main(args)
     }
 
 }
