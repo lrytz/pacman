@@ -2,14 +2,16 @@ package epfl.pacman
 package interface
 
 import swing._
-import event.ButtonClicked
 import java.awt.{Color, Insets}
+import maze.MVC
 
-class PacmanApp(mazeView: maze.view.View) extends SimpleSwingApplication {
+class PacmanApp(mvc: MVC) extends SimpleSwingApplication {
+
+  import mvc._
 
   // not used right now, but this is what they should be...
-  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + mazeView.width + 10
-  val height = mazeView.height
+  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + view.width + 10
+  val height = view.height
 
   def top = new MainFrame {
     title = "Scala Pacman"
@@ -56,7 +58,7 @@ class PacmanApp(mazeView: maze.view.View) extends SimpleSwingApplication {
       c.insets = new Insets(0, 5, 10, 5)
       layout(pauseButton) = c
 
-      val maze = mazeView
+      val maze = view
       c.fill = Fill.Both
       c.gridheight = 3
       c.gridx = 2

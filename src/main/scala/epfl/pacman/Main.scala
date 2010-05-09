@@ -1,23 +1,18 @@
 package epfl.pacman
 
-import maze.controller._
-import maze.model._
-import maze.view._
+import maze.MVC
 
 object Main {
   val rnd = new scala.util.Random(System.currentTimeMillis)
 
   def main(args: Array[String]): Unit = {
-    var model = new Model()
-    val view = new View(model)
-    val controller = new Controller(view)
-    val ticker = new Ticker(controller)
+    val mvc = new MVC
 
-    new interface.PacmanApp(view).main(args)
+    new interface.PacmanApp(mvc).main(args)
     
     Thread.sleep(3000)
-    controller.start()
-    ticker.start()
+    mvc.controller.start()
+    mvc.ticker.start()
   }
 
 }
