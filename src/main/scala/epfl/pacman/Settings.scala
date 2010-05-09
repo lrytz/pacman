@@ -21,5 +21,5 @@ object Settings {
   val ticksToDie = 60
 
   // miliseconds of sleep between one pixel move of a figure  
-  val sleepTime = 20
+  val sleepTime = 15
 }

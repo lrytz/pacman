@@ -20,13 +20,16 @@ trait Controllers { this: MVC =>
 
     private def makeOffsetPosition(to: Position, dir: Direction) = {
       val s = Settings.blockSize
+      
       val (xo, yo) = dir match {
         case Up    => (0, s)
         case Left  => (s, 0)
         case Down  => (0, -s)
         case Right => (-s, 0)
       }
-      OffsetPosition(to.x, to.y, xo, yo)
+
+      @inline def donut(i: Int, s: Int) = (i + s) % s
+      OffsetPosition(donut(to.x, Settings.hBlocks), donut(to.y, Settings.vBlocks), xo, yo)
     }
 
     def act() {

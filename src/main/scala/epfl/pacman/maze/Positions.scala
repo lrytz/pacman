@@ -31,14 +31,18 @@ trait Positions { this: MVC =>
 
   case class OffsetPosition(val x: Int, val y: Int, var xo: Int = 0, var yo: Int = 0) extends Position {
     def overlaps(other: OffsetPosition) = {
-      val selfX = x * Settings.blockSize + xo
-      val selfY = y * Settings.blockSize + yo
+      val s = Settings.blockSize
 
-      val otherX = other.x * Settings.blockSize + other.xo
-      val otherY = other.y * Settings.blockSize + other.yo
+      val selfX = x * s + xo
+      val selfY = y * s + yo
 
-      (math.abs(selfX - otherX) < Settings.overlapThreshold) &&
-      (math.abs(selfY - otherY) < Settings.overlapThreshold)
+      val otherX = other.x * s + other.xo
+      val otherY = other.y * s + other.yo
+
+      val t = Settings.overlapThreshold
+
+      (math.abs(selfX - otherX) < t) &&
+      (math.abs(selfY - otherY) < t)
     }
   }
 
