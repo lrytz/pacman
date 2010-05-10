@@ -19,26 +19,23 @@ trait Views { this: MVC =>
 
     preferredSize = new Dimension(width, height)
 
-    override lazy val peer = new JComponent() {
-      override def paintComponent(graph: Graphics) {
-        val g = graph.asInstanceOf[Graphics2D]
+    override def paintComponent(g: Graphics2D) {
 
-        g.setColor(Color.BLACK)
+      g.setColor(Color.BLACK)
 
-        for (w <- model.walls) {
-          drawWall(w, g)
-        }
-
-        for (m <- model.monsters) {
-          drawMonster(m, g)
-        }
-
-        // this makes look pacman much better (do it here, not for walls, for efficiency)
-        import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-
-        drawPacman(model.pacman, g)
+      for (w <- model.walls) {
+        drawWall(w, g)
       }
+
+      for (m <- model.monsters) {
+        drawMonster(m, g)
+      }
+
+      // this makes look pacman much better (do it here, not for walls, for efficiency)
+      import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
+      g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+
+      drawPacman(model.pacman, g)
     }
 
     @inline final def toAbs(x: Int, o: Int = 0) = x * blockSize + o
@@ -105,29 +102,29 @@ trait Views { this: MVC =>
       var tborder = 0
       var bborder = 0
 
-      if (!model.isWallAt(w.pos.onTop)) {
-        g.drawPolyline(Array(x, x+blockSize), Array(y, y), 2)
-        tborder = 5
-      }
-
-      if (!model.isWallAt(w.pos.onBottom)) {
-        g.drawPolyline(Array(x, x+blockSize), Array(y+blockSize, y+blockSize), 2)
-        bborder = 5
-      }
-
-      if (!model.isWallAt(w.pos.onLeft)) {
-        g.drawPolyline(Array(x, x), Array(y, y+blockSize), 2)
-        lborder = 3
-      }
-
-      if (!model.isWallAt(w.pos.onRight)) {
-        g.drawPolyline(Array(x+blockSize, x+blockSize), Array(y, y+blockSize), 2)
-        rborder = 3
-      }
+//      if (!model.isWallAt(w.pos.onTop)) {
+//        g.drawLine(x, y, x+blockSize, y)
+//        tborder = 5
+//      }
+//
+//      if (!model.isWallAt(w.pos.onBottom)) {
+//        g.drawLine(x, y+blockSize, x+blockSize, y+blockSize)
+//        bborder = 5
+//      }
+//
+//      if (!model.isWallAt(w.pos.onLeft)) {
+//        g.drawLine(x, y, x, y+blockSize)
+//        lborder = 3
+//      }
+//
+//      if (!model.isWallAt(w.pos.onRight)) {
+//        g.drawLine(x+blockSize, y, x+blockSize, y+blockSize)
+//        rborder = 3
+//      }
 
       g.setColor(Color.BLUE)
       for (i <- tborder to blockSize-bborder by 5) {
-        g.drawPolyline(Array(x+lborder, x+blockSize-rborder), Array(y + i, y + i), 2)
+        g.drawLine(x+lborder, y + i, x+blockSize-rborder, y + i)
       }
     }
 
