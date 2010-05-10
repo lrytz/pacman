@@ -2,6 +2,7 @@ package epfl.pacman
 package maze
 
 import actors.Actor
+import java.awt.Rectangle
 
 trait Controllers { this: MVC =>
   
@@ -32,6 +33,12 @@ trait Controllers { this: MVC =>
       OffsetPosition(donut(to.x, Settings.hBlocks), donut(to.y, Settings.vBlocks), xo, yo)
     }
 
+    @inline final def figureRect(f: Figure) = {
+      val pos = f.pos
+      val s = Settings.blockSize
+      new Rectangle(pos.x*s + pos.xo - 1, pos.y*s + pos.yo - 1, s + 2, s + 2)
+    }
+
     def act() {
       loop {
         react {
@@ -58,7 +65,11 @@ trait Controllers { this: MVC =>
               // update the figure's offsets
               tickCounter -= 1
               model.pacman.incrOffset()
-              for (monster <- model.monsters) monster.incrOffset()
+              view.repaint(figureRect(model.pacman))
+              for (monster <- model.monsters) {
+                monster.incrOffset()
+                view.repaint(figureRect(monster))
+              }
 
               if (model.monsters.exists(m => {
                 m.pos.overlaps(model.pacman.pos)
@@ -67,13 +78,12 @@ trait Controllers { this: MVC =>
                 dieCounter = Settings.ticksToDie
               }
 
-              view.repaint()
-
             } else if (dieCounter > 0) {
               dieCounter -= 1
               if (dieCounter == 0) {
                 tickCounter = 0
                 model = model.randomizeFigures()
+                view.repaint() // rull repaint to get rid of old figures
                 resume()
               }
             }

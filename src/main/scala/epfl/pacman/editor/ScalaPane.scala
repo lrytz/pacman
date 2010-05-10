@@ -9,7 +9,7 @@ import javax.swing.event.{DocumentEvent, DocumentListener}
 import javax.swing.text._
 import util.matching.Regex
 import java.awt.event.{KeyEvent, KeyListener}
-import java.awt.{Dimension, Color}
+import java.awt.Color
 
 class ScalaPane extends Component { thisPane =>
 

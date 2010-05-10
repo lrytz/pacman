@@ -12,7 +12,7 @@ object Settings {
   val hBlocks = 30
 
   // size in number of pixels of one block in the maze
-  val blockSize  = 40
+  val blockSize  = 30
 
   // distance in number of pixels that make pacman been eaten
   val overlapThreshold = 10
@@ -22,4 +22,7 @@ object Settings {
 
   // miliseconds of sleep between one pixel move of a figure  
   val sleepTime = 15
+
+  // keywords to highlight in the code editor
+  val keywords = List("pac", "man")
 }

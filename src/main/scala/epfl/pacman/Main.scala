@@ -9,9 +9,9 @@ object Main {
     val mvc = new MVC
 
     new interface.PacmanApp(mvc).main(args)
-    
-    Thread.sleep(3000)
+
     mvc.controller.start()
+    Thread.sleep(2000)
     mvc.ticker.start()
   }
 
