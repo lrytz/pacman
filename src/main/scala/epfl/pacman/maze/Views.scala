@@ -79,7 +79,7 @@ trait Views { this: MVC =>
       val xOffset = 3
       val yOffset = 6
 
-      val img = if (m.laser.status) { images((m.laser.animOffset % 3) + 1) } else { images(0) }
+      val img = if (m.laser.status) { images((m.laser.animOffset/2 % 3) + 1) } else { images(0) }
 
       g.drawImage(img, toAbs(m.pos.x, m.pos.xo) + xOffset, toAbs(m.pos.y, m.pos.yo) + yOffset, null)
     }

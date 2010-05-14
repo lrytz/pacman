@@ -33,7 +33,7 @@ trait Thingies { this: MVC =>
 
   case class Monster(override val pos: OffsetPosition, override val dir: Direction, val laser: LaserSettings) extends Figure(pos, dir) {
     def incrAnimOffset {
-      laser.animOffset = (laser.animOffset + 1) % 3
+      laser.animOffset = (laser.animOffset + 1) % 6
     }
     def activateLaser {
       laser.status = true
