@@ -37,6 +37,10 @@ trait Views { this: MVC =>
 
       g.drawImage(maze, 0, 0, null)
 
+      for (p <- model.points) {
+        drawPoint(p, g)
+      }
+
       for (m <- model.monsters) {
         drawMonster(m, g)
       }
@@ -67,6 +71,27 @@ trait Views { this: MVC =>
       }) + angle
 
       g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, startAngle, 360 - 2*angle)
+    }
+    
+    val cherryImg = ImageIO.read(new File("src/main/resources/cherry.png"))
+
+    def drawPoint(p: Point, g: Graphics2D) = {
+      g.setColor(Color.GRAY)
+
+
+      p match {
+        case _: NormalPoint =>
+          val radius = 4
+          val centerX = toAbs(p.pos.x, 0) + blockSize/2
+          val centerY = toAbs(p.pos.y, 0) + blockSize/2
+
+          g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, 0, 360)
+        case _: SuperPoint =>
+          val xOffset = 3
+          val yOffset = 6
+
+          g.drawImage(cherryImg, toAbs(p.pos.x, 0) + xOffset, toAbs(p.pos.y, 0) + yOffset, null)
+      }
     }
 
     val images = ("src/main/resources/badguy0.png" ::

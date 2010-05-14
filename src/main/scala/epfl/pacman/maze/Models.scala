@@ -5,9 +5,9 @@ trait Models { this: MVC =>
 
   var model: Model
 
-  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], paused: Boolean) {
+  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], points: Set[Point], paused: Boolean) {
 
-    def this() = this(new PacMan(new OffsetPosition(14, 10), Right, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, false)
+    def this() = this(new PacMan(new OffsetPosition(14, 10), Right, Hunted, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
 
     def randomizeFigures() = {
       import scala.util.Random.nextInt
@@ -46,13 +46,13 @@ trait Models { this: MVC =>
 
   object ModelDefaults {
     val monsters: Set[Monster] = {
-      Set() +
-              Monster(new OffsetPosition(1,1),  Right, new LaserSettings(true, 0)) +
+      Set() + Monster(new OffsetPosition(1,1),  Right, new LaserSettings(true, 0)) +
               Monster(new OffsetPosition(28,1),  Left, new LaserSettings(true, 0)) +
               Monster(new OffsetPosition(28,18), Left, new LaserSettings(true, 0)) +
               Monster(new OffsetPosition(1,18), Right, new LaserSettings(true, 0))
 
     }
+
     val maze: Set[Wall] = {
       def w(x: Int, y: Int) = Wall(new BlockPosition(x,y))
 
@@ -100,6 +100,20 @@ trait Models { this: MVC =>
               (for(y <- 17 to 17; x <- 2 to 4)    yield w(x, y)) ++
               (for(y <- 17 to 17; x <- 25 to 27)  yield w(x, y)) ++
               (for(y <- 15 to 17; x <- 21 to 22)  yield w(x, y))
+    }
+
+    val points: Set[Point] = {
+      import scala.util.Random.nextInt
+      val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
+
+      Set[Point]() ++
+        (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
+          if (nextInt(40) == 0) {
+            SuperPoint(new BlockPosition(x, y))
+          } else {
+            NormalPoint(new BlockPosition(x, y))
+          }
+        })
     }
   }
 }

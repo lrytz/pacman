@@ -6,6 +6,10 @@ trait Thingies { this: MVC =>
   var id = 0
   def freshId = { id += 1; id }
   
+  abstract class Point(val pos: Position)
+  case class NormalPoint(override val pos: Position) extends Point(pos)
+  case class SuperPoint(override val pos: Position) extends Point(pos)
+
   abstract class Thingy(val pos: Position, id: Int = freshId)
 
   abstract class Figure(override val pos: OffsetPosition, val dir: Direction) extends Thingy(pos) {
@@ -25,7 +29,11 @@ trait Thingies { this: MVC =>
 
   case class LaserSettings(var status: Boolean, var animOffset: Int = 0)
 
-  case class PacMan(override val pos: OffsetPosition, override val dir: Direction, val angle: Angle) extends Figure(pos, dir) {
+  sealed abstract class Mode
+  case object Hunted extends Mode
+  case object Hunter extends Mode
+
+  case class PacMan(override val pos: OffsetPosition, override val dir: Direction, val mode: Mode, val angle: Angle) extends Figure(pos, dir) {
     def incrAngle {
       angle.counter = (angle.counter + 1) % 60
     }

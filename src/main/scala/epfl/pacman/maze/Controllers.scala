@@ -50,7 +50,15 @@ trait Controllers { this: MVC =>
                 tickCounter = Settings.blockSize
                 val newPacman = {
                   val (pos, dir) = pacmanBehavior.next(model, model.pacman)
-                  PacMan(makeOffsetPosition(pos, dir), dir, model.pacman.angle)
+                  model.pacman.copy(pos = makeOffsetPosition(pos, dir), dir =  dir)
+                }
+
+                val p = model.points.find(p => p.pos == model.pacman.pos)
+
+                val newPoints = if (!p.isEmpty) {
+                    model.points - p.get
+                } else {
+                    model.points
                 }
 
                 val newMonsters = model.monsters.map(monster => {
@@ -58,7 +66,7 @@ trait Controllers { this: MVC =>
                   Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = model.clearPathBetween(monster, model.pacman)))
                 })
 
-                model = model.copy(newPacman, newMonsters)
+                model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
 
               }
 
