@@ -27,6 +27,21 @@ trait Models { this: MVC =>
     for (w <- walls) wallCache.+=(w.pos)
 
     def isWallAt(pos: Position) = wallCache.contains(pos) // walls.exists(_.pos == pos)
+
+    def clearPathBetween(from: Figure, to: Figure) = {
+        // check whether <from> can "see" <to>
+        if (from.pos.x == to.pos.x) {
+            (from.pos.y.min(to.pos.y) to from.pos.y.max(to.pos.y)).forall(y =>
+                !isWallAt(BlockPosition(from.pos.x, y))
+            )
+        } else if (from.pos.y == to.pos.y) {
+            (from.pos.x.min(to.pos.x) to from.pos.x.max(to.pos.x)).forall(x =>
+                !isWallAt(BlockPosition(x, from.pos.y))
+            )
+        } else {
+            false
+        }
+    }
   }
 
   object ModelDefaults {

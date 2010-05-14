@@ -55,7 +55,7 @@ trait Controllers { this: MVC =>
 
                 val newMonsters = model.monsters.map(monster => {
                   val (pos, dir) = monsterBehavior.next(model, monster)
-                  Monster(makeOffsetPosition(pos, dir), dir, monster.laser)
+                  Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = model.clearPathBetween(monster, model.pacman)))
                 })
 
                 model = model.copy(newPacman, newMonsters)
