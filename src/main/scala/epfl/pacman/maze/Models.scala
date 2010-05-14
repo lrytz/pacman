@@ -5,20 +5,20 @@ trait Models { this: MVC =>
 
   var model: Model
 
-  case class Model(pacman: Figure, monsters: Set[Figure], walls: Set[Wall], paused: Boolean) {
+  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], paused: Boolean) {
 
-    def this() = this(new Figure(new OffsetPosition(14, 10), Right), ModelDefaults.monsters, ModelDefaults.maze, false)
+    def this() = this(new PacMan(new OffsetPosition(14, 10), Right, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, false)
 
     def randomizeFigures() = {
       import scala.util.Random.nextInt
-      def getPos(avoid: Set[Figure] = Set()) = {
+      def getPos(avoid: Set[Monster]): OffsetPosition = {
         var p = OffsetPosition(0, 0)
         do {
           p = new OffsetPosition(nextInt(Settings.hBlocks), nextInt(Settings.vBlocks))
         } while (isWallAt(p) || avoid.exists(m => m.pos == p))
         p
       }
-      val newMonsters = monsters map (m => m.copy(getPos()))
+      val newMonsters = monsters map (m => m.copy(getPos(Set())))
       copy(pacman.copy(getPos(newMonsters)), newMonsters)
     }
 
@@ -30,12 +30,12 @@ trait Models { this: MVC =>
   }
 
   object ModelDefaults {
-    val monsters: Set[Figure] = {
+    val monsters: Set[Monster] = {
       Set() +
-              Figure(new OffsetPosition(1,1), Right) +
-              Figure(new OffsetPosition(28,1), Left) +
-              Figure(new OffsetPosition(28,18), Left) +
-              Figure(new OffsetPosition(1,18), Right)
+              Monster(new OffsetPosition(1,1), Right, false) +
+              Monster(new OffsetPosition(28,1), Left, false) +
+              Monster(new OffsetPosition(28,18), Left, false) +
+              Monster(new OffsetPosition(1,18), Right, false)
 
     }
     val maze: Set[Wall] = {

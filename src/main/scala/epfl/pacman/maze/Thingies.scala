@@ -2,10 +2,13 @@ package epfl.pacman
 package maze
 
 trait Thingies { this: MVC =>
-  
-  abstract class Thingy(val pos: Position)
 
-  case class Figure(override val pos: OffsetPosition, val dir: Direction) extends Thingy(pos) {
+  var id = 0
+  def freshId = { id += 1; id }
+  
+  abstract class Thingy(val pos: Position, id: Int = freshId)
+
+  abstract class Figure(override val pos: OffsetPosition, val dir: Direction) extends Thingy(pos) {
     def incrOffset() {
       dir match {
         case Up    => pos.yo -= 1
@@ -15,6 +18,18 @@ trait Thingies { this: MVC =>
       }
     }
   }
+
+  case class Angle(var counter: Int) {
+    def value = if (counter > 30) 60-counter else counter
+  }
+
+  case class PacMan(override val pos: OffsetPosition, override val dir: Direction, val angle: Angle) extends Figure(pos, dir) {
+    def incrAngle() {
+      angle.counter = (angle.counter + 1) % 60
+    }
+  }
+
+  case class Monster(override val pos: OffsetPosition, override val dir: Direction, val laser: Boolean) extends Figure(pos, dir)
 
   case class Wall(override val pos: Position) extends Thingy(pos)
 

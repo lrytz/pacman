@@ -12,7 +12,7 @@ object Settings {
   val hBlocks = 30
 
   // size in number of pixels of one block in the maze
-  val blockSize  = 30
+  val blockSize  = 25
 
   // distance in number of pixels that make pacman been eaten
   val overlapThreshold = 10

@@ -50,12 +50,12 @@ trait Controllers { this: MVC =>
                 tickCounter = Settings.blockSize
                 val newPacman = {
                   val (pos, dir) = pacmanBehavior.next(model, model.pacman)
-                  Figure(makeOffsetPosition(pos, dir), dir)
+                  PacMan(makeOffsetPosition(pos, dir), dir, model.pacman.angle)
                 }
 
                 val newMonsters = model.monsters.map(monster => {
                   val (pos, dir) = monsterBehavior.next(model, monster)
-                  Figure(makeOffsetPosition(pos, dir), dir)
+                  Monster(makeOffsetPosition(pos, dir), dir, false)
                 })
 
                 model = model.copy(newPacman, newMonsters)
@@ -65,6 +65,7 @@ trait Controllers { this: MVC =>
               // update the figure's offsets
               tickCounter -= 1
               model.pacman.incrOffset()
+              model.pacman.incrAngle()
               view.repaint(figureRect(model.pacman))
               for (monster <- model.monsters) {
                 monster.incrOffset()

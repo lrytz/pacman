@@ -5,4 +5,4 @@ setup:
 	@ test -d classes || mkdir classes
 
 run: all
-	@ scala -cp classes scala.epfl.pacman.Main
+	@ scala -cp classes epfl.pacman.Main

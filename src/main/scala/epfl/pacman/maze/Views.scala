@@ -50,14 +50,14 @@ trait Views { this: MVC =>
 
     @inline final def toAbs(x: Int, o: Int = 0) = x * blockSize + o
 
-    def drawPacman(p: Figure, g: Graphics2D) = {
+    def drawPacman(p: PacMan, g: Graphics2D) = {
       g.setColor(Color.YELLOW)
 
       val radius = blockSize/2 - 5
       val centerX = toAbs(p.pos.x, p.pos.xo) + blockSize/2
       val centerY = toAbs(p.pos.y, p.pos.yo) + blockSize/2
 
-      val angle = 30
+      val angle = p.angle.value
 
       val startAngle = (p.dir match {
         case Up    => 90
