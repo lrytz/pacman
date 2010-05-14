@@ -7,6 +7,7 @@ import java.awt.{Color, Insets}
 import maze.MVC
 import editor.ScalaPane
 import Swing._
+import compiler.BehaviorCompiler
 
 class PacmanApp(mvc: MVC) extends SimpleSwingApplication {
 
@@ -24,6 +25,7 @@ class PacmanApp(mvc: MVC) extends SimpleSwingApplication {
     doc.preferredSize = (Settings.docTextWidth, view.height)
 
     val code = new ScalaPane()
+    code.text = defaultBehavior
     code.keywords ++= Settings.keywords
     code.preferredSize = (Settings.codeTextWidth, 0)
 
@@ -82,8 +84,10 @@ class PacmanApp(mvc: MVC) extends SimpleSwingApplication {
     listenTo(runButton, pauseButton)
     reactions += {
       case ButtonClicked(`runButton`) =>
-        mvc.controller ! mvc.Tick
-
+        controller ! Pause
+        val comp = new BehaviorCompiler(mvc)
+        comp.compile(code.text)
+      
       case ButtonClicked(`pauseButton`) =>
         if (mvc.model.paused) {
           pauseButton.text = "Arreter..."
