@@ -69,13 +69,19 @@ trait Views { this: MVC =>
       g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, startAngle, 360 - 2*angle)
     }
 
-    val image = ImageIO.read(new File("src/main/resources/badguy1.png"))
+    val images = ("src/main/resources/badguy0.png" ::
+                  "src/main/resources/badguy1.png" ::
+                  "src/main/resources/badguy2.png" ::
+                  "src/main/resources/badguy3.png" :: Nil).map(path => ImageIO.read(new File(path)))
 
-    def drawMonster(m: Figure, g: Graphics2D) = {
+
+    def drawMonster(m: Monster, g: Graphics2D) = {
       val xOffset = 3
       val yOffset = 6
 
-      g.drawImage(image, toAbs(m.pos.x, m.pos.xo) + xOffset, toAbs(m.pos.y, m.pos.yo) + yOffset, null)
+      val img = if (m.laser.status) { images((m.laser.animOffset % 3) + 1) } else { images(0) }
+
+      g.drawImage(img, toAbs(m.pos.x, m.pos.xo) + xOffset, toAbs(m.pos.y, m.pos.yo) + yOffset, null)
     }
 
     def drawWall(w: Wall, g: Graphics2D) = {

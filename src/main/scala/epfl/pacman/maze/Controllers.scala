@@ -55,7 +55,7 @@ trait Controllers { this: MVC =>
 
                 val newMonsters = model.monsters.map(monster => {
                   val (pos, dir) = monsterBehavior.next(model, monster)
-                  Monster(makeOffsetPosition(pos, dir), dir, false)
+                  Monster(makeOffsetPosition(pos, dir), dir, monster.laser)
                 })
 
                 model = model.copy(newPacman, newMonsters)
@@ -64,11 +64,12 @@ trait Controllers { this: MVC =>
 
               // update the figure's offsets
               tickCounter -= 1
-              model.pacman.incrOffset()
-              model.pacman.incrAngle()
+              model.pacman.incrOffset
+              model.pacman.incrAngle
               view.repaint(figureRect(model.pacman))
               for (monster <- model.monsters) {
-                monster.incrOffset()
+                monster.incrOffset
+                monster.incrAnimOffset
                 view.repaint(figureRect(monster))
               }
 

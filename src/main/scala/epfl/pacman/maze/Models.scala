@@ -32,10 +32,10 @@ trait Models { this: MVC =>
   object ModelDefaults {
     val monsters: Set[Monster] = {
       Set() +
-              Monster(new OffsetPosition(1,1), Right, false) +
-              Monster(new OffsetPosition(28,1), Left, false) +
-              Monster(new OffsetPosition(28,18), Left, false) +
-              Monster(new OffsetPosition(1,18), Right, false)
+              Monster(new OffsetPosition(1,1),  Right, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(28,1),  Left, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(28,18), Left, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(1,18), Right, new LaserSettings(true, 0))
 
     }
     val maze: Set[Wall] = {
