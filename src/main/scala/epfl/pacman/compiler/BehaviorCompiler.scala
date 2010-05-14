@@ -15,20 +15,21 @@ package behaviour
 
 import maze.MVC
 
-trait Behaviors { this: MVC =>
-
-  class Behavior {
-    def next(model: Model, character: Figure): (Position, Direction) = {
+class SubBehaviors(val mvc: MVC) {
+  import mvc._
+  class SubBehavior extends Behavior {
 %s
-    }
   }
 }"""
 
   private val settings = new Settings()
 
   settings.classpath.value = {
-    val l = this.getClass.getProtectionDomain.getCodeSource.getLocation
-    new java.io.File(l.toURI).getAbsolutePath
+    def pathOf(cls: Class[_]) = {
+      val l = cls.getProtectionDomain.getCodeSource.getLocation
+      new java.io.File(l.toURI).getAbsolutePath
+    }
+    pathOf(this.getClass) +":"+ pathOf(classOf[ScalaObject]) +":"+ pathOf(classOf[Global])
   }
 
   val outDir = new VirtualDirectory("(memory)", None)
@@ -38,20 +39,36 @@ trait Behaviors { this: MVC =>
 
   private val global = new Global(settings)
 
-  def compile(body: String) {
-    val source = template.format(body)
-    val run = new global.Run
-    val file = new BatchSourceFile("<behavior>", source)
-    run.compileSources(List(file))
+  def compile(body: String, finish: () => Unit) {
+    val t = new Thread() {
+      override def run() {
 
-    val parent = ScalaClassLoader.fromURLs(new PathResolver(settings).asURLs)
-    val classLoader = new AbstractFileClassLoader(outDir, parent)
+        val source = template.format(body)
+        val run = new global.Run
+        val file = new BatchSourceFile("<behavior>", source)
+        run.compileSources(List(file))
 
-    val c = classLoader.findClass("epfl.pacman.Behaviors$Behavior")
-    val i = c.newInstance().asInstanceOf[mvc.Behavior]
-    mvc.controller ! mvc.Pause
-    mvc.controller ! mvc.Load(i)
-    mvc.controller ! mvc.Resume
+        val parent = this.getClass.getClassLoader
+        val classLoader = new AbstractFileClassLoader(outDir, parent)
+
+        val behaviors = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors")
+        val behaviorsConstr = behaviors.getConstructors.apply(0)
+        val behaviorsInst = behaviorsConstr.newInstance(mvc).asInstanceOf[AnyRef]
+
+        val behavior = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors$SubBehavior")
+        val behaviorConstr = behavior.getConstructors.apply(0)
+        val behaviorInst = behaviorConstr.newInstance(behaviorsInst).asInstanceOf[mvc.Behavior]
+
+        println("res: "+ behaviorInst)
+
+        swing.Swing.onEDT {
+          mvc.controller ! mvc.Load(behaviorInst)
+          mvc.controller ! mvc.Resume
+          finish()
+        }
+      }
+    }
+    t.start()
   }
 
 }

@@ -6,36 +6,40 @@ import maze.MVC
 trait Behaviors { this: MVC =>
 
   def defaultBehavior =
-"""def next(dir: Direction) = {
-  val pos = character.pos.nextIn(dir)
-  if (model.isWallAt(pos)) None
-  else Some(pos, dir)
-}
+"""override def next(model: Model, character: Figure): (Position, Direction) = {
+  def nextOpt(dir: Direction) = {
+    val pos = character.pos.nextIn(dir)
+    if (model.isWallAt(pos)) None
+    else Some(pos, dir)
+  }
 
-next(character.dir).getOrElse {
-  val dirs = Array(character.dir.left, character.dir.right)
-  java.util.Collections.shuffle(java.util.Arrays.asList(dirs: _*))
-  next(dirs(0)).getOrElse {
-    next(dirs(1)).getOrElse {
-      next(character.dir.opposite).get
-    }
+  val ahead = nextOpt(character.dir)
+  val left = nextOpt(character.dir.left)
+  val right = nextOpt(character.dir.right)
+  val back = nextOpt(character.dir.opposite)
+
+  val dirs = Array(ahead, left, right).filter(_.isDefined)
+  if (dirs.isEmpty) back.get
+  else {
+    java.util.Collections.shuffle(java.util.Arrays.asList(dirs: _*))
+    dirs(0).get
   }
 }"""
 
   class Behavior {
     def next(model: Model, character: Figure): (Position, Direction) = {
-      def next(dir: Direction) = {
+      def nextIn(dir: Direction) = {
         val pos = character.pos.nextIn(dir)
         if (model.isWallAt(pos)) None
         else Some(pos, dir)
 
       }
-      next(character.dir).getOrElse {
+      nextIn(character.dir).getOrElse {
         val dirs = Array(character.dir.left, character.dir.right)
         java.util.Collections.shuffle(java.util.Arrays.asList(dirs: _*))
-        next(dirs(0)).getOrElse {
-          next(dirs(1)).getOrElse {
-            next(character.dir.opposite).get
+        nextIn(dirs(0)).getOrElse {
+          nextIn(dirs(1)).getOrElse {
+            nextIn(character.dir.opposite).get
           }
         }
       }

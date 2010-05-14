@@ -66,6 +66,9 @@ trait Controllers { this: MVC =>
               tickCounter -= 1
               model.pacman.incrOffset
               model.pacman.incrAngle
+
+              // @TODO: repaint old location when figure moves out of the grid (donut)
+
               view.repaint(figureRect(model.pacman))
               for (monster <- model.monsters) {
                 monster.incrOffset

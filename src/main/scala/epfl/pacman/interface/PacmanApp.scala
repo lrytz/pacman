@@ -85,8 +85,15 @@ class PacmanApp(mvc: MVC) extends SimpleSwingApplication {
     reactions += {
       case ButtonClicked(`runButton`) =>
         controller ! Pause
+        runButton.text = "Code en charge..."
+        runButton.enabled = false
+        pauseButton.enabled = false
         val comp = new BehaviorCompiler(mvc)
-        comp.compile(code.text)
+        comp.compile(code.text, () => {
+          runButton.text = "Lancer!"
+          runButton.enabled = true
+          pauseButton.enabled = true
+        })
       
       case ButtonClicked(`pauseButton`) =>
         if (mvc.model.paused) {
