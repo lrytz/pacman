@@ -55,7 +55,15 @@ trait Views { this: MVC =>
     @inline final def toAbs(x: Int, o: Int = 0) = x * blockSize + o
 
     def drawPacman(p: PacMan, g: Graphics2D) = {
-      g.setColor(Color.YELLOW)
+      if (p.mode == Hunted) {
+        g.setColor(Color.YELLOW)
+      } else {
+        if (((p.angle.value / 4) & 1) == 0) {
+            g.setColor(Color.GREEN)
+        } else {
+            g.setColor(Color.RED)
+        }
+      }
 
       val radius = blockSize/2 - 5
       val centerX = toAbs(p.pos.x, p.pos.xo) + blockSize/2

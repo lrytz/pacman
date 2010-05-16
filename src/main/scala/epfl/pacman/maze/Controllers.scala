@@ -45,10 +45,21 @@ trait Controllers { this: MVC =>
           case Tick =>
             if (!model.paused) {
 
-              if (tickCounter == 0) {
-                // compute next block position if all the small steps have been painted
-                tickCounter = Settings.blockSize
-                val newPacman = {
+              if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.mode == Hunter)) {
+
+                val newMonsters = if (tickCounter == 0) {
+                  tickCounter = Settings.blockSize
+
+                  // compute next block position if all the small steps have been painted
+                  model.monsters.map(monster => {
+                    val (pos, dir) = monsterBehavior.next(model, monster)
+                    Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = model.clearPathBetween(monster, model.pacman)))
+                  })
+                } else {
+                  model.monsters
+                }
+
+                var newPacman = {
                   val (pos, dir) = pacmanBehavior.next(model, model.pacman)
                   model.pacman.copy(pos = makeOffsetPosition(pos, dir), dir =  dir)
                 }
@@ -56,24 +67,29 @@ trait Controllers { this: MVC =>
                 val p = model.points.find(p => p.pos == model.pacman.pos)
 
                 val newPoints = if (!p.isEmpty) {
+                    if (p.get.isInstanceOf[SuperPoint]) {
+                        newPacman = newPacman.copy(mode = Hunter)
+                    }
                     model.points - p.get
                 } else {
                     model.points
                 }
 
-                val newMonsters = model.monsters.map(monster => {
-                  val (pos, dir) = monsterBehavior.next(model, monster)
-                  Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = model.clearPathBetween(monster, model.pacman)))
-                })
-
                 model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
-
               }
 
-              // update the figure's offsets
+
               tickCounter -= 1
-              model.pacman.incrOffset
-              model.pacman.incrAngle
+
+              // update the figure's offsets
+              if (model.pacman.mode == Hunter) {
+                model.pacman.incrOffset
+                model.pacman.incrOffset
+                model.pacman.incrAngle
+              } else {
+                model.pacman.incrOffset
+                model.pacman.incrAngle
+              }
 
               // @TODO: repaint old location when figure moves out of the grid (donut)
 

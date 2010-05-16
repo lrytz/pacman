@@ -106,9 +106,9 @@ trait Models { this: MVC =>
       import scala.util.Random.nextInt
       val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
 
-      Set[Point]() ++
+      collection.immutable.ListSet[Point]() ++
         (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
-          if (nextInt(40) == 0) {
+          if (nextInt(10) == 0) {
             SuperPoint(new BlockPosition(x, y))
           } else {
             NormalPoint(new BlockPosition(x, y))

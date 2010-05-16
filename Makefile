@@ -4,5 +4,8 @@ all: setup
 setup:
 	@ test -d classes || mkdir classes
 
-run: all
+
+onlyrun:
 	@ scala -cp classes epfl.pacman.Main
+
+run: all onlyrun
