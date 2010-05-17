@@ -45,5 +45,29 @@ trait Behaviors { this: MVC =>
       }
     }
   }
-  
+
+  class StructuredModel(model: Model) {
+
+    // all viable blocks
+    val allPos = (for (x <- 0 to (Settings.hBlocks-1); y <- 0 to (Settings.vBlocks-1)) yield BlockPosition(x, y)).toSet -- model.wallCache
+
+    def expandPos(pos: Position) : Set[Position] =
+      ((-1, 0) :: (1, 0) :: (0, -1) :: (0, 1) :: Nil).map(offset => BlockPosition(pos.x+offset._1, pos.y+offset._2)).toSet + pos
+
+    def expand(poss: Set[Position]) : Set[Position] =
+      poss.flatMap(expandPos _) & allPos
+
+    def minDistBetween(from: Set[Position], to: Set[Position]): Int = {
+      var poses = from
+      var dist = 0
+
+      while((poses & to).isEmpty) {
+        poses = expand(poses);
+        dist += 1
+      }
+
+      dist
+    }
+  }
+
 }

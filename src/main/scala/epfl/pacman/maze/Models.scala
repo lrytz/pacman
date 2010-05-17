@@ -23,8 +23,7 @@ trait Models { this: MVC =>
     }
 
 
-    private val wallCache = new collection.mutable.HashSet[Position]()
-    for (w <- walls) wallCache.+=(w.pos)
+    val wallCache = Set[BlockPosition]() ++ walls.map(_.pos)
 
     def isWallAt(pos: Position) = wallCache.contains(pos) // walls.exists(_.pos == pos)
 
