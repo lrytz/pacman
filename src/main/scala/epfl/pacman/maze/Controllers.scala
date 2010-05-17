@@ -9,8 +9,9 @@ trait Controllers { this: MVC =>
   val controller: Controller
 
   class Controller extends Actor {
-    var pacmanBehavior  = new Behavior()
-    val monsterBehavior = new Behavior()
+    var pacmanBehavior: PacManBehavior   = new DefaultPacManBehavior()
+    val monsterBehavior: MonsterBehavior = new DefaultMonsterBehavior()
+
     val structuredModel = new StructuredModel(new Model)
 
     // @TODO: maybe put these into the model?
@@ -21,14 +22,18 @@ trait Controllers { this: MVC =>
     def pause() { model = model.copy(paused = true) }
     def resume() { model = model.copy(paused = false) }
 
-    private def makeOffsetPosition(to: Position, dir: Direction) = {
+    private def makeOffsetPosition(to: Position, dir: Direction, stopped: Boolean) = {
       val s = Settings.blockSize
-      
-      val (xo, yo) = dir match {
-        case Up    => (0, s)
-        case Left  => (s, 0)
-        case Down  => (0, -s)
-        case Right => (-s, 0)
+
+      val (xo, yo) = if(!stopped) {
+        dir match {
+          case Up    => (0, s)
+          case Left  => (s, 0)
+          case Down  => (0, -s)
+          case Right => (-s, 0)
+        }
+      } else {
+        (0, 0)
       }
 
       @inline def donut(i: Int, s: Int) = (i + s) % s
@@ -39,6 +44,16 @@ trait Controllers { this: MVC =>
       val pos = f.pos
       val s = Settings.blockSize
       new Rectangle(pos.x*s + pos.xo - 1, pos.y*s + pos.yo - 1, s + 2, s + 2)
+    }
+
+    def validateDir(model: Model, f: Figure, optDir: Option[Direction]): (Position, Direction, Boolean) = {
+        // Make sure the direction is possible
+        optDir match {
+            case Some(dir) if !model.isWallAt(f.pos.nextIn(dir)) =>
+                (f.pos.nextIn(dir), dir, false)
+            case _ =>
+                (f.pos, f.dir, true)
+        }
     }
 
     def act() {
@@ -54,17 +69,18 @@ trait Controllers { this: MVC =>
 
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
-                    val (pos, dir) = monsterBehavior.next(model, monster)
+                    val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
                     val laserMode  = structuredModel.minDistBetween(monster.pos, model.pacman.pos) < 10
-                    Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = laserMode))
+                    Monster(makeOffsetPosition(pos, dir, stopped), stopped, dir, monster.laser.copy(status = laserMode))
                   })
                 } else {
                   model.monsters
                 }
 
                 var newPacman = {
-                  val (pos, dir) = pacmanBehavior.next(model, model.pacman)
-                  model.pacman.copy(pos = makeOffsetPosition(pos, dir), dir =  dir)
+                  val pacman = model.pacman
+                  val (pos, dir, stopped) = validateDir(model, pacman, pacmanBehavior.next(model, pacman))
+                  pacman.copy(pos = makeOffsetPosition(pos, dir, stopped), stopped = stopped, dir =  dir)
                 }
 
                 val p = model.points.find(p => p.pos == model.pacman.pos)
@@ -92,19 +108,24 @@ trait Controllers { this: MVC =>
 
               // update the figure's offsets
               if (model.pacman.mode == Hunter) {
-                model.pacman.incrOffset
-                model.pacman.incrOffset
+                if (!model.pacman.stopped) {
+                  model.pacman.incrOffset
+                  model.pacman.incrOffset
+                }
                 model.pacman.incrAngle
               } else {
-                model.pacman.incrOffset
+                if (!model.pacman.stopped) {
+                  model.pacman.incrOffset
+                }
                 model.pacman.incrAngle
               }
 
-              // @TODO: repaint old location when figure moves out of the grid (donut)
-
               view.repaint(figureRect(model.pacman))
+
               for (monster <- model.monsters) {
-                monster.incrOffset
+                if (!monster.stopped) {
+                  monster.incrOffset
+                }
                 monster.incrAnimOffset
                 view.repaint(figureRect(monster))
               }
@@ -159,5 +180,5 @@ trait Controllers { this: MVC =>
   case object Tick
   case object Pause
   case object Resume
-  case class Load(pacmanBehavior: Behavior)
+  case class Load(pacmanBehavior: PacManBehavior)
 }

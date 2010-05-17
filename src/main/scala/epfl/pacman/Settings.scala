@@ -21,7 +21,7 @@ object Settings {
   val ticksToDie = 60
 
   // number of major ticks for the hunter mode to last
-  val ticksToHunt = 10
+  val ticksToHunt = 16
 
   // miliseconds of sleep between one pixel move of a figure  
   val sleepTime = 15

@@ -7,7 +7,7 @@ trait Models { this: MVC =>
 
   case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], points: Set[Point], paused: Boolean) {
 
-    def this() = this(new PacMan(new OffsetPosition(14, 10), Right, Hunted, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
+    def this() = this(new PacMan(new OffsetPosition(14, 10), true,  Right, Hunted, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
 
     def randomizeFigures() = {
       import scala.util.Random.nextInt
@@ -45,10 +45,10 @@ trait Models { this: MVC =>
 
   object ModelDefaults {
     val monsters: Set[Monster] = {
-      Set() + Monster(new OffsetPosition(1,1),  Right, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(28,1),  Left, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(28,18), Left, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(1,18), Right, new LaserSettings(true, 0))
+      Set() + Monster(new OffsetPosition(1,1),   false, Right, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(28,1),  false, Left, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(28,18), false, Left, new LaserSettings(true, 0)) +
+              Monster(new OffsetPosition(1,18),  false, Right, new LaserSettings(true, 0))
 
     }
 

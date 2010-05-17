@@ -17,8 +17,14 @@ import maze.MVC
 
 class SubBehaviors(val mvc: MVC) {
   import mvc._
-  class SubBehavior extends Behavior {
-%s
+  class SubPacManBehavior extends PacManBehavior {
+    def getMethod(model: Model, p: PacMan) = {
+      new NextMethod(model, p) {
+        def apply = {
+           %s
+        }
+      }
+    }
   }
 }"""
 
@@ -55,9 +61,9 @@ class SubBehaviors(val mvc: MVC) {
         val behaviorsConstr = behaviors.getConstructors.apply(0)
         val behaviorsInst = behaviorsConstr.newInstance(mvc).asInstanceOf[AnyRef]
 
-        val behavior = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors$SubBehavior")
+        val behavior = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors$SubPacManBehavior")
         val behaviorConstr = behavior.getConstructors.apply(0)
-        val behaviorInst = behaviorConstr.newInstance(behaviorsInst).asInstanceOf[mvc.Behavior]
+        val behaviorInst = behaviorConstr.newInstance(behaviorsInst).asInstanceOf[mvc.PacManBehavior]
 
         println("res: "+ behaviorInst)
 
