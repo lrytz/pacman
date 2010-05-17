@@ -70,6 +70,11 @@ siChasseur {
         randomBestDir(withDistBetween(directions.dirs, Set[Position]() + model.pacman.pos).sortWith((a, b) => a._2 > b._2))
       }
 
+      val Droite = new Directions(Set(Right))
+      val Gauche = new Directions(Set(Left))
+      val Bas    = new Directions(Set(Down))
+      val Haut   = new Directions(Set(Up))
+
       /**
        * Internal stuff
        */
