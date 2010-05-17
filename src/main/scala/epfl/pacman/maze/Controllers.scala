@@ -9,8 +9,9 @@ trait Controllers { this: MVC =>
   val controller: Controller
 
   class Controller extends Actor {
-    var pacmanBehavior = new Behavior()
+    var pacmanBehavior  = new Behavior()
     val monsterBehavior = new Behavior()
+    val structuredModel = new StructuredModel(new Model)
 
     // @TODO: maybe put these into the model?
     private var tickCounter = 0
@@ -54,7 +55,8 @@ trait Controllers { this: MVC =>
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
                     val (pos, dir) = monsterBehavior.next(model, monster)
-                    Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = model.clearPathBetween(monster, model.pacman)))
+                    val laserMode  = structuredModel.minDistBetween(monster.pos, model.pacman.pos) < 10
+                    Monster(makeOffsetPosition(pos, dir), dir, monster.laser.copy(status = laserMode))
                   })
                 } else {
                   model.monsters

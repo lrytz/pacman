@@ -57,6 +57,9 @@ trait Behaviors { this: MVC =>
     def expand(poss: Set[Position]) : Set[Position] =
       poss.flatMap(expandPos _) & allPos
 
+    def minDistBetween(from: Position, to: Position): Int =
+        minDistBetween(Set(from), Set(to))
+
     def minDistBetween(from: Set[Position], to: Set[Position]): Int = {
       var poses = from
       var dist = 0
