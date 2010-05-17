@@ -107,7 +107,7 @@ trait Models { this: MVC =>
 
       collection.immutable.ListSet[Point]() ++
         (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
-          if (nextInt(10) == 0) {
+          if (nextInt(100) < Settings.superPointsRatio) {
             SuperPoint(new BlockPosition(x, y))
           } else {
             NormalPoint(new BlockPosition(x, y))

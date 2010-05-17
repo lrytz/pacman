@@ -26,6 +26,9 @@ object Settings {
   // miliseconds of sleep between one pixel move of a figure  
   val sleepTime = 15
 
+  // percent of points that are super points
+  val superPointsRatio = 5
+
   // keywords to highlight in the code editor
   val keywords = List("pac", "man")
 }
