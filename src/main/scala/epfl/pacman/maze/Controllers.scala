@@ -15,6 +15,7 @@ trait Controllers { this: MVC =>
     // @TODO: maybe put these into the model?
     private var tickCounter = 0
     private var dieCounter = 0
+    private var hunterCounter = 0
 
     def pause() { model = model.copy(paused = true) }
     def resume() { model = model.copy(paused = false) }
@@ -69,15 +70,21 @@ trait Controllers { this: MVC =>
                 val newPoints = if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
                         newPacman = newPacman.copy(mode = Hunter)
+                        hunterCounter = Settings.ticksToHunt
                     }
                     model.points - p.get
                 } else {
                     model.points
                 }
 
+                if (hunterCounter > 0) {
+                  hunterCounter -= 1
+                  if (hunterCounter == 0) {
+                    newPacman = newPacman.copy(mode = Hunted)
+                  }
+                }
                 model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
               }
-
 
               tickCounter -= 1
 
@@ -100,11 +107,15 @@ trait Controllers { this: MVC =>
                 view.repaint(figureRect(monster))
               }
 
-              if (model.monsters.exists(m => {
-                m.pos.overlaps(model.pacman.pos)
-              })) {
-                pause()
-                dieCounter = Settings.ticksToDie
+              val omonst = model.monsters.find(m => { m.pos.overlaps(model.pacman.pos) })
+              if (!omonst.isEmpty) {
+                if (model.pacman.mode == Hunter) {
+                  // eat the monster
+                  model = model.copy(monsters = model.monsters - omonst.get)
+                } else {
+                  pause()
+                  dieCounter = Settings.ticksToDie
+                }
               }
 
             } else if (dieCounter > 0) {
