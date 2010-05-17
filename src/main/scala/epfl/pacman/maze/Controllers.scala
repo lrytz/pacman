@@ -77,10 +77,13 @@ trait Controllers { this: MVC =>
                   model.monsters
                 }
 
-                var newPacman = {
-                  val pacman = model.pacman
-                  val (pos, dir, stopped) = validateDir(model, pacman, pacmanBehavior.next(model, pacman))
-                  pacman.copy(pos = makeOffsetPosition(pos, dir, stopped), stopped = stopped, dir =  dir)
+                var newPacman = model.pacman
+
+                if (hunterCounter > 0) {
+                  hunterCounter -= 1
+                  if (hunterCounter == 0) {
+                    newPacman = newPacman.copy(mode = Hunted)
+                  }
                 }
 
                 val p = model.points.find(p => p.pos == model.pacman.pos)
@@ -95,12 +98,9 @@ trait Controllers { this: MVC =>
                     model.points
                 }
 
-                if (hunterCounter > 0) {
-                  hunterCounter -= 1
-                  if (hunterCounter == 0) {
-                    newPacman = newPacman.copy(mode = Hunted)
-                  }
-                }
+                val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
+                newPacman = newPacman.copy(pos = makeOffsetPosition(pos, dir, stopped), stopped = stopped, dir =  dir)
+
                 model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
               }
 
