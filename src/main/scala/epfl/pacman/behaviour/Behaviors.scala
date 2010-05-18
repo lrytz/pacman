@@ -46,6 +46,8 @@ siChasseur {
 
       def choisirParmis(dirs: Directions) : Directions = dirs
 
+      def retourne: Directions = Directions(Set(c.dir.opposite))
+
       def directions: Directions = {
         val ahead = nextOpt(c.dir)
         val left  = nextOpt(c.dir.left)
@@ -169,6 +171,8 @@ siChasseur {
 
 
   case class Directions(dirs: Set[Direction]) {
+     def telQue(cond: Direction => Boolean) = tellesQue(cond)
+
      def tellesQue(cond: Direction => Boolean) = {
         Directions(dirs filter cond)
      }

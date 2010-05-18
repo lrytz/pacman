@@ -19,7 +19,7 @@ trait Models { this: MVC =>
         p
       }
       val newMonsters = monsters map (m => m.copy(getPos(Set())))
-      copy(pacman.copy(getPos(newMonsters)), newMonsters)
+      copy(pacman.copy(getPos(newMonsters)), newMonsters, walls, points = ModelDefaults.points, false)
     }
 
 

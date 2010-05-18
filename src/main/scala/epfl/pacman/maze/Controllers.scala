@@ -65,36 +65,40 @@ trait Controllers { this: MVC =>
             if (!model.paused) {
 
               if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.mode == Hunter)) {
+                val majorTick = tickCounter == 0
 
-                var newMonsters = if (tickCounter == 0) {
+                var newMonsters = if (majorTick) {
                   tickCounter = Settings.blockSize
 
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
                     val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                    val laserMode  = sModel.minDistBetween(monster.pos, model.pacman.pos) < 10
+                    val laserMode  = (sModel.minDistBetween(monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
                     Monster(makeOffsetPosition(pos, dir, stopped), stopped, dir, monster.laser.copy(status = laserMode))
                   })
                 } else {
                   model.monsters
                 }
 
-                if(revivals.exists(_._1 == 0)) {
-                    for ((tick, monst) <- revivals if tick == 0) {
-                        val pos = sModel.randomValidPos
-                        newMonsters += monst.copy(pos = makeOffsetPosition(pos, Right, false), laser = monst.laser.copy(status = false))
-                    }
-                    revivals = revivals.filter(_._1 != 0)
-                }
-
-                // decrement counters
-                revivals = revivals.map(r => (r._1-1, r._2))
-
                 var newPacman = model.pacman
 
                 if (hunterCounter > 0) {
                   hunterCounter -= 1
-                  if (hunterCounter == 0) {
+                }
+
+                if (majorTick) {
+                  if(revivals.exists(_._1 == 0)) {
+                    for ((tick, monst) <- revivals if tick == 0) {
+                      val pos = sModel.randomValidPos
+                      newMonsters += monst.copy(makeOffsetPosition(pos, Right, false), false,  Right, monst.laser.copy(status = false))
+                    }
+                    revivals = revivals.filter(_._1 != 0)
+                  }
+
+                  // decrement counters
+                  revivals = revivals.map(r => (r._1-1, r._2))
+
+                  if (newPacman.mode == Hunter && hunterCounter == 0) {
                     newPacman = newPacman.copy(mode = Hunted)
                   }
                 }
