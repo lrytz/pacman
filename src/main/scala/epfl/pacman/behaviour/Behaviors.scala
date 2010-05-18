@@ -11,9 +11,9 @@ siChasseur {
   directionVersLesMonstres
 } sinon {
   siMonstresLoin {
-     directions
-  } sinon {
      directionLoinDesMonstres
+  } sinon {
+     cheminLoinDesMonstres
   }
 }
 """
@@ -37,11 +37,11 @@ siChasseur {
       }
 
       def siMonstresPrès(body: => Directions) : Condition = {
-          Condition(() => sModel.minDistBetween(model.pacman.pos, positions(model.monsters)) < 10, () => body)
+          Condition(() => sModel.minDistBetween(model.pacman.pos, positions(model.monsters)) < 20, () => body)
       }
 
       def siMonstresLoin(body: => Directions) : Condition = {
-          Condition(() => sModel.minDistBetween(model.pacman.pos, positions(model.monsters)) >= 10, () => body)
+          Condition(() => sModel.minDistBetween(model.pacman.pos, positions(model.monsters)) >= 20, () => body)
       }
 
       def choisirParmis(dirs: Directions) : Directions = dirs
@@ -55,20 +55,32 @@ siChasseur {
         Directions((ahead :: left :: right :: back :: Nil).collect{ case Some(pos) => pos }.toSet)
       }
 
+      def directionsEnAvant: Directions = {
+        val ahead = nextOpt(c.dir)
+        val left  = nextOpt(c.dir.left)
+        val right = nextOpt(c.dir.right)
+
+        Directions((ahead :: left :: right :: Nil).collect{ case Some(pos) => pos }.toSet)
+      }
+
       def directionLoinDesMonstres: Directions = {
-        randomBestDir(withDistBetween(directions.dirs, Set[Position]() ++ model.monsters.map(_.pos)).sortWith((a, b) => a._2 > b._2))
+        maxDistTo(Set[Position]() ++ model.monsters.map(_.pos))
+      }
+
+      def cheminLoinDesMonstres: Directions = {
+        maxPathTo(Set[Position]() ++ model.monsters.map(_.pos))
       }
 
       def directionVersLesMonstres: Directions = {
-        randomBestDir(withDistBetween(directions.dirs, Set[Position]() ++ model.monsters.map(_.pos)).sortWith((a, b) => a._2 < b._2))
+        minDistTo(Set[Position]() ++ model.monsters.map(_.pos))
       }
 
       def directionVersPacMan: Directions = {
-        randomBestDir(withDistBetween(directions.dirs, Set[Position]() + model.pacman.pos).sortWith((a, b) => a._2 < b._2))
+        minDistTo(Set[Position](model.pacman.pos))
       }
 
       def directionLoinDePacMan: Directions = {
-        randomBestDir(withDistBetween(directions.dirs, Set[Position]() + model.pacman.pos).sortWith((a, b) => a._2 > b._2))
+        maxDistTo(Set[Position](model.pacman.pos))
       }
 
       val Droite = new Directions(Set(Right))
@@ -80,12 +92,30 @@ siChasseur {
        * Internal stuff
        */
 
+      def minDistTo(to: Set[Position]) = {
+        randomBestDir(withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 < b._2))
+      }
+
+      def maxDistTo(to: Set[Position]) = {
+        randomBestDir(withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 > b._2))
+      }
+
+      def maxPathTo(to: Set[Position]) = {
+        randomBestDir(withPathBetween(directionsEnAvant.dirs, to).sortWith((a, b) => a._2 > b._2))
+      }
+
       def randomBestDir(positions: Seq[(Direction, Int)]): Directions = {
         import scala.util.Random.nextInt
 
         val best = positions.filter(_._2 == positions.head._2)
 
         Directions(Set[Direction]() + best(nextInt(best.size))._1)
+      }
+
+      def withPathBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
+        directions.toSeq.map(dir =>
+          (dir, sModel.maxPathBetween(c.pos, dir, to))
+        )
       }
 
       def withDistBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
@@ -162,9 +192,9 @@ siChasseur {
             directionVersLesMonstres
           } sinon {
             siMonstresLoin {
-               directions
-            } sinon {
                directionLoinDesMonstres
+            } sinon {
+               cheminLoinDesMonstres
             }
           }
         }
@@ -205,60 +235,6 @@ siChasseur {
      * loinDesCerises
      * 
      */
-  /*
-  class BehaviorHelper(model: Model, character: Figure) {
-    val structuredModel = new StructuredModel(model)
-
-    def nextOpt(dir: Direction) = {
-      val pos = character.pos.nextIn(dir)
-      if (model.isWallAt(pos)) None
-      else Some(pos, dir)
-    }
-
-    def allerVers(d: Direction): (Position, Direction) = {
-        nextOpt(d).getOrElse(character.pos, d)
-    }
-
-    def directionsPossibles: Array[(Position, Direction)] = {
-      val ahead = nextOpt(character.dir)
-      val left  = nextOpt(character.dir.left)
-      val right = nextOpt(character.dir.right)
-      val back  = nextOpt(character.dir.opposite)
-
-      Array(ahead, left, right, back).collect{ case Some(posDir) => posDir }
-    }
-
-    def randomBestDir(positions: Seq[(Direction, Int)]): Direction = {
-      import scala.util.Random.nextInt
-
-      val best = positions.filter(_._2 == positions.head._2)
-
-      best(nextInt(best.size))._1
-    }
-
-    def withDistBetween(positions: Seq[(Position, Direction)], to: Set[Position]): Seq[(Direction, Int)] = {
-      positions.map(posDir =>
-        (posDir._2, structuredModel.minDistBetween(posDir._1, to))
-      )
-    }
-    def directionLoinDesMonstres: Direction = {
-      randomBestDir(withDistBetween(directionsPossibles, Set[Position]() ++ model.monsters.map(_.pos)).sortWith((a, b) => a._2 > b._2))
-    }
-
-    def directionVersLesMonstres: Direction = {
-      randomBestDir(withDistBetween(directionsPossibles, Set[Position]() ++ model.monsters.map(_.pos)).sortWith((a, b) => a._2 < b._2))
-    }
-
-    def directionVersPacMan: Direction = {
-      randomBestDir(withDistBetween(directionsPossibles, Set[Position]() + model.pacman.pos).sortWith((a, b) => a._2 < b._2))
-    }
-
-    def directionLoinDePacMan: Direction = {
-      randomBestDir(withDistBetween(directionsPossibles, Set[Position]() + model.pacman.pos).sortWith((a, b) => a._2 > b._2))
-    }
-
-  }
-  */
 
   class StructuredModel(model: Model) {
     // Build a undirected graph of the possible ways
@@ -311,6 +287,26 @@ siChasseur {
 
         dist min max
       }
+
+      def maxPathFrom(p: Position, max: Int): Int = {
+        var toVisit: Set[Node] = Set(nodes(p))
+        var dist = 0
+
+        while (!toVisit.isEmpty && dist < max) {
+          dist += 1
+          val toVisitBatch = toVisit
+          for (n <- toVisitBatch) {
+            if (n.color == 0) {
+              edgesFrom(n).foreach(toVisit += _)
+              n.color = 1;
+            } else if (n.color == 2) {
+              // ignore this path
+            }
+          }
+        }
+
+        dist min max
+      }
     }
 
     // all viable blocks
@@ -326,14 +322,15 @@ siChasseur {
       for (toD <- List(Left, Right, Up, Down)) {
         var toP = fromP.nextIn(toD)
 
-        if ((toP.x < 0) || (toP.x > (Settings.hBlocks-1))) {
-            // circular
-            toP = new BlockPosition((toP.x+Settings.hBlocks) % Settings.hBlocks, toP.y)
-        }
         if (!model.isWallAt(toP)) {
           g.addEdge(fromP, toP)
         }
       }
+    }
+
+    def randomValidPos = {
+        import scala.util.Random.nextInt
+        allPos.toSeq.apply(nextInt(allPos.size))
     }
 
     def minDistBetween(from: Position, to: Position): Int =
@@ -342,6 +339,13 @@ siChasseur {
     def minDistBetween(from: Position, to: Set[Position]): Int = {
       g.markTargets(to)
       val r = g.simpleDistFrom(from, 45)
+      g.clear
+      r
+    }
+
+    def maxPathBetween(init: Position, dir: Direction, to: Set[Position]): Int = {
+      g.markTargets(to + init)
+      val r = g.maxPathFrom(init.nextIn(dir), 45)
       g.clear
       r
     }

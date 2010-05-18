@@ -8,9 +8,9 @@ trait Positions { this: MVC =>
     val y: Int
 
     def onTop    = new BlockPosition(x, y-1)
-    def onLeft   = new BlockPosition(x-1, y)
+    def onLeft   = new BlockPosition((x-1+Settings.hBlocks) % Settings.hBlocks, y)
     def onBottom = new BlockPosition(x, y+1)
-    def onRight  = new BlockPosition(x+1, y)
+    def onRight  = new BlockPosition((x+1) % Settings.hBlocks, y)
 
     def nextIn(dir: Direction) = dir match {
       case Up    => onTop

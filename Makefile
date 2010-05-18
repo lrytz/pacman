@@ -6,6 +6,6 @@ setup:
 
 
 onlyrun:
-	@ scala -cp classes epfl.pacman.Main
+	@ scala -cp classes epfl.pacman.Main 2>&1 | tee last.log
 
 run: all onlyrun

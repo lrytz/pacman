@@ -10,7 +10,7 @@ trait Thingies { this: MVC =>
   case class NormalPoint(override val pos: Position) extends Point(pos)
   case class SuperPoint(override val pos: Position) extends Point(pos)
 
-  abstract class Thingy(val pos: Position, id: Int = freshId)
+  abstract class Thingy(val pos: Position)
 
   abstract class Figure(override val pos: OffsetPosition, val stopped: Boolean, val dir: Direction) extends Thingy(pos) {
     def incrOffset {
@@ -46,7 +46,8 @@ trait Thingies { this: MVC =>
   case class Monster(override val pos: OffsetPosition,
                      override val stopped: Boolean,
                      override val dir: Direction,
-                     val laser: LaserSettings) extends Figure(pos, stopped, dir) {
+                     val laser: LaserSettings,
+                     val id: Int = freshId) extends Figure(pos, stopped, dir) {
     def incrAnimOffset {
       laser.animOffset = (laser.animOffset + 1) % 6
     }

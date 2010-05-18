@@ -3,6 +3,7 @@ package maze
 
 import actors.Actor
 import java.awt.Rectangle
+import scala.util.Random.nextInt
 
 trait Controllers { this: MVC =>
   
@@ -12,12 +13,13 @@ trait Controllers { this: MVC =>
     var pacmanBehavior: PacManBehavior   = new DefaultPacManBehavior()
     val monsterBehavior: MonsterBehavior = new DefaultMonsterBehavior()
 
-    val structuredModel = new StructuredModel(new Model)
+    val sModel = new StructuredModel(new Model)
 
     // @TODO: maybe put these into the model?
     private var tickCounter = 0
     private var dieCounter = 0
     private var hunterCounter = 0
+    private var revivals: List[(Int, Monster)] = Nil
 
     def pause() { model = model.copy(paused = true) }
     def resume() { model = model.copy(paused = false) }
@@ -64,18 +66,29 @@ trait Controllers { this: MVC =>
 
               if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.mode == Hunter)) {
 
-                val newMonsters = if (tickCounter == 0) {
+                var newMonsters = if (tickCounter == 0) {
                   tickCounter = Settings.blockSize
 
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
                     val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                    val laserMode  = structuredModel.minDistBetween(monster.pos, model.pacman.pos) < 10
+                    val laserMode  = sModel.minDistBetween(monster.pos, model.pacman.pos) < 10
                     Monster(makeOffsetPosition(pos, dir, stopped), stopped, dir, monster.laser.copy(status = laserMode))
                   })
                 } else {
                   model.monsters
                 }
+
+                if(revivals.exists(_._1 == 0)) {
+                    for ((tick, monst) <- revivals if tick == 0) {
+                        val pos = sModel.randomValidPos
+                        newMonsters += monst.copy(pos = makeOffsetPosition(pos, Right, false), laser = monst.laser.copy(status = false))
+                    }
+                    revivals = revivals.filter(_._1 != 0)
+                }
+
+                // decrement counters
+                revivals = revivals.map(r => (r._1-1, r._2))
 
                 var newPacman = model.pacman
 
@@ -122,6 +135,11 @@ trait Controllers { this: MVC =>
 
               view.repaint(figureRect(model.pacman))
 
+              // Repaint borders so that the donut doesn't leave traces
+              val s = Settings.blockSize
+              view.repaint(new Rectangle(0, 0, s, Settings.vBlocks*s))
+              view.repaint(new Rectangle((Settings.hBlocks-1)*s, 0, Settings.hBlocks*s, Settings.vBlocks*s))
+
               for (monster <- model.monsters) {
                 if (!monster.stopped) {
                   monster.incrOffset
@@ -135,6 +153,7 @@ trait Controllers { this: MVC =>
                 if (model.pacman.mode == Hunter) {
                   // eat the monster
                   model = model.copy(monsters = model.monsters - omonst.get)
+                  revivals = (nextInt(10)+10, omonst.get) :: revivals
                 } else {
                   pause()
                   dieCounter = Settings.ticksToDie

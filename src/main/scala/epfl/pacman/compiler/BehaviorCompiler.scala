@@ -65,8 +65,6 @@ class SubBehaviors(val mvc: MVC) {
         val behaviorConstr = behavior.getConstructors.apply(0)
         val behaviorInst = behaviorConstr.newInstance(behaviorsInst).asInstanceOf[mvc.PacManBehavior]
 
-        println("res: "+ behaviorInst)
-
         swing.Swing.onEDT {
           mvc.controller ! mvc.Load(behaviorInst)
           mvc.controller ! mvc.Resume
