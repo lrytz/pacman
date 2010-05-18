@@ -19,8 +19,9 @@ siChasseur {
 """
 
   abstract class Behavior[T <: Figure] {
+    val sModel = new StructuredModel(new Model)
+
     abstract class NextMethod(model: Model, c: T) extends Function0[Option[Direction]] {
-      val sModel = new StructuredModel(model)
 
       def apply: Option[Direction];
 
@@ -260,32 +261,89 @@ siChasseur {
   */
 
   class StructuredModel(model: Model) {
-    // all viable blocks
-    val allPos = (for (x <- 0 to (Settings.hBlocks-1); y <- 0 to (Settings.vBlocks-1)) yield BlockPosition(x, y)).toSet -- model.wallCache
+    // Build a undirected graph of the possible ways
+    class Graph {
+      case class Node(pos: Position, var color: Int = 0)
+      var nodes     = Map[Position, Node]()
+      var edgesFrom = Map[Node, Set[Node]]().withDefaultValue(Set())
 
-    def expandPos(pos: Position) : Set[Position] =
-      ((-1, 0) :: (1, 0) :: (0, -1) :: (0, 1) :: Nil).map(offset => BlockPosition(pos.x+offset._1, pos.y+offset._2)).toSet + pos
-
-    def expand(poss: Set[Position]) : Set[Position] =
-      poss.flatMap(expandPos _) & allPos
-
-    def minDistBetween(from: Position, to: Position): Int =
-        minDistBetween(Set(from), Set(to))
-
-    def minDistBetween(from: Position, to: Set[Position]): Int =
-        minDistBetween(Set(from), to)
-
-    def minDistBetween(from: Set[Position], to: Set[Position]): Int = {
-      var positions = from
-      var dist = 0
-
-      while((positions& to).isEmpty) {
-        positions = expand(positions);
-        dist += 1
+      def addNode(pos: Position) {
+        if (!(nodes contains pos)) {
+          nodes += (pos -> Node(pos))
+        } else {
+          error("Node "+pos+" already in")
+        }
+      }
+      def addEdge(from: Position, to: Position) {
+        val fromN = nodes(from)
+        val toN   = nodes(to)
+        edgesFrom += fromN -> (edgesFrom(fromN) + toN)
       }
 
-      dist
+      def markTargets(positions: Set[Position]) {
+        for (p <- positions) {
+            nodes(p).color = 2
+        }
+      }
+
+      def clear {
+        for ((p, n) <- nodes) {
+            n.color = 0
+        }
+      }
+
+      def simpleDistFrom(p: Position, max: Int): Int = {
+        var toVisit: Set[Node] = Set(nodes(p))
+        var dist = 0
+
+        while (!toVisit.isEmpty && dist < max) {
+          dist += 1
+          val toVisitBatch = toVisit
+          for (n <- toVisitBatch) {
+            if (n.color == 0) {
+              edgesFrom(n).foreach(toVisit += _)
+              n.color = 1;
+            } else if (n.color == 2) {
+              return dist;
+            }
+          }
+        }
+
+        dist min max
+      }
+    }
+
+    // all viable blocks
+    val allPos = (for (x <- 0 to (Settings.hBlocks-1); y <- 0 to (Settings.vBlocks-1)) yield BlockPosition(x, y)).toSet -- model.wallCache
+    val g = new Graph
+
+    // add all nodes
+    for (p <- allPos) {
+      g.addNode(p)
+    }
+    // connect them
+    for (fromP <- allPos) {
+      for (toD <- List(Left, Right, Up, Down)) {
+        var toP = fromP.nextIn(toD)
+
+        if ((toP.x < 0) || (toP.x > (Settings.hBlocks-1))) {
+            // circular
+            toP = new BlockPosition((toP.x+Settings.hBlocks) % Settings.hBlocks, toP.y)
+        }
+        if (!model.isWallAt(toP)) {
+          g.addEdge(fromP, toP)
+        }
+      }
+    }
+
+    def minDistBetween(from: Position, to: Position): Int =
+      minDistBetween(from, Set(to))
+
+    def minDistBetween(from: Position, to: Set[Position]): Int = {
+      g.markTargets(to)
+      val r = g.simpleDistFrom(from, 45)
+      g.clear
+      r
     }
   }
-
 }
