@@ -37,6 +37,10 @@ trait Views { this: MVC =>
 
       g.drawImage(maze, 0, 0, null)
 
+      // this makes look the points and pacman much better
+      import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
+      g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+
       for (p <- model.points) {
         drawPoint(p, g)
       }
@@ -44,10 +48,6 @@ trait Views { this: MVC =>
       for (m <- model.monsters) {
         drawMonster(m, g)
       }
-
-      // this makes look pacman much better (for efficiency only here, not for the walls / monsters)
-      import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
-      g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
       drawPacman(model.pacman, g)
     }

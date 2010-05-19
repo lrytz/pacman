@@ -3,6 +3,8 @@ package behaviour
 
 import maze.MVC
 
+// @TODO: doesn't need to BE an MVC, it can just TAKE one. then: no need for an outer trait.
+
 trait Behaviors { this: MVC =>
 
   def defaultBehavior =
