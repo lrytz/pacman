@@ -1,7 +1,7 @@
 package epfl.pacman
 package maze
 
-trait Positions { this: MVC =>
+trait Positions { this: Models =>
 
   sealed abstract class Position {
     val x: Int

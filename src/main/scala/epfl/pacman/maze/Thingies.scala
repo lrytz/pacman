@@ -1,18 +1,18 @@
 package epfl.pacman
 package maze
 
-trait Thingies { this: MVC =>
+trait Thingies { this: Models =>
 
-  var id = 0
-  def freshId = { id += 1; id }
+  private var id = 0
+  private def freshId = { id += 1; id }
 
-  abstract class Point(val pos: Position)
-  case class NormalPoint(override val pos: Position) extends Point(pos)
-  case class SuperPoint(override val pos: Position) extends Point(pos)
+  abstract class Thingy { val pos: Position }
 
-  abstract class Thingy(val pos: Position)
+  abstract class Figure extends Thingy {
+    override val pos: OffsetPosition
+    val dir: Direction
+    val stopped: Boolean
 
-  abstract class Figure(override val pos: OffsetPosition, val stopped: Boolean, val dir: Direction) extends Thingy(pos) {
     def incrOffset {
       dir match {
         case Up    => pos.yo -= 1
@@ -23,42 +23,64 @@ trait Thingies { this: MVC =>
     }
   }
 
-  case class Angle(var counter: Int) {
-    def value = if (counter > 30) 60-counter else counter
-  }
-
-  case class LaserSettings(var status: Boolean, var animOffset: Int = 0)
+  /**
+   * PacMan
+   */
 
   sealed abstract class Mode
   case object Hunted extends Mode
   case object Hunter extends Mode
 
-  case class PacMan(override val pos: OffsetPosition,
-                    override val stopped: Boolean,
-                    override val dir: Direction,
-                    val mode: Mode,
-                    val angle: Angle) extends Figure(pos, stopped, dir) {
+  case class Angle(var counter: Int) {
+    def value = if (counter > 30) 60-counter else counter
+  }
+
+  case class PacMan(pos: OffsetPosition,
+                    dir: Direction,
+                    stopped: Boolean = true,
+                    mode: Mode = Hunted,
+                    angle: Angle = Angle(30)) extends Figure {
     def incrAngle {
       angle.counter = (angle.counter + 1) % 60
     }
   }
 
-  case class Monster(override val pos: OffsetPosition,
-                     override val stopped: Boolean,
-                     override val dir: Direction,
-                     val laser: LaserSettings,
-                     val id: Int = freshId) extends Figure(pos, stopped, dir) {
+
+  /**
+   * Monsters
+   */
+
+  case class LaserSettings(var status: Boolean, var animOffset: Int)
+
+  case class Monster(pos: OffsetPosition,
+                     dir: Direction,
+                     stopped: Boolean = false,
+                     laser: LaserSettings = LaserSettings(true, 0),
+                     id: Int = freshId) extends Figure {
     def incrAnimOffset {
       laser.animOffset = (laser.animOffset + 1) % 6
     }
+
     def activateLaser {
       laser.status = true
     }
+
     def deactivateLaser {
       laser.status = false
     }
   }
 
-  case class Wall(override val pos: Position) extends Thingy(pos)
+  /**
+   * Walls
+   */
 
+  case class Wall(pos: Position) extends Thingy
+
+
+  /**
+   * Points
+   */
+
+  case class NormalPoint(pos: Position) extends Thingy
+  case class SuperPoint(pos: Position) extends Thingy
 }

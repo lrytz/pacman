@@ -4,16 +4,18 @@ package maze
 import actors.Actor
 import java.awt.Rectangle
 import scala.util.Random.nextInt
+import behaviour.{DefaultMonsterBehavior, DefaultPacManBehavior, Behavior}
 
-trait Controllers { this: MVC =>
-  
-  val controller: Controller
+trait Controllers { mvc: MVC =>
 
   class Controller extends Actor {
-    var pacmanBehavior: PacManBehavior   = new DefaultPacManBehavior()
-    val monsterBehavior: MonsterBehavior = new DefaultMonsterBehavior()
+    var pacmanBehavior: Behavior { val mvc: Controllers.this.type } = new DefaultPacManBehavior {
+      val mvc: Controllers.this.type = Controllers.this
+    }
 
-    val sModel = new StructuredModel(new Model)
+    val monsterBehavior = new DefaultMonsterBehavior {
+      val mvc: Controllers.this.type = Controllers.this
+    }
 
     // @TODO: maybe put these into the model?
     private var tickCounter = 0
@@ -73,8 +75,8 @@ trait Controllers { this: MVC =>
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
                     val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                    val laserMode  = (sModel.minDistBetween(monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
-                    Monster(makeOffsetPosition(pos, dir, stopped), stopped, dir, monster.laser.copy(status = laserMode))
+                    val laserMode  = (model.minDistBetween(monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
+                    Monster(makeOffsetPosition(pos, dir, stopped), dir, stopped, monster.laser.copy(status = laserMode))
                   })
                 } else {
                   model.monsters
@@ -89,8 +91,8 @@ trait Controllers { this: MVC =>
                 if (majorTick) {
                   if(revivals.exists(_._1 == 0)) {
                     for ((tick, monst) <- revivals if tick == 0) {
-                      val pos = sModel.randomValidPos
-                      newMonsters += monst.copy(makeOffsetPosition(pos, Right, false), false,  Right, monst.laser.copy(status = false))
+                      val pos = model.randomValidPos
+                      newMonsters += monst.copy(makeOffsetPosition(pos, Right, false),  Right, false, monst.laser.copy(status = false))
                     }
                     revivals = revivals.filter(_._1 != 0)
                   }
@@ -116,7 +118,7 @@ trait Controllers { this: MVC =>
                 }
 
                 val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
-                newPacman = newPacman.copy(pos = makeOffsetPosition(pos, dir, stopped), stopped = stopped, dir =  dir)
+                newPacman = newPacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped)
 
                 model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
               }
@@ -181,10 +183,12 @@ trait Controllers { this: MVC =>
             resume()
 
           case Load(newPacmanBehavior) =>
-            assert(model.paused, "trying to load new model while game is running")
+            //assert(model.paused, "trying to load new model while game is running")
             pacmanBehavior = newPacmanBehavior
             resume()
 
+          case Error(line) =>
+            
         }
       }
     }
@@ -203,5 +207,6 @@ trait Controllers { this: MVC =>
   case object Tick
   case object Pause
   case object Resume
-  case class Load(pacmanBehavior: PacManBehavior)
+  case class Load(pacmanBehavior: Behavior { val mvc: Controllers.this.type })
+  case class Error(line: Int)
 }

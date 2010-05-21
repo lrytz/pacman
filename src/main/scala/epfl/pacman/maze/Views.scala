@@ -10,8 +10,6 @@ import Swing._
 
 trait Views { this: MVC =>
 
-  val view: View
-
   class View extends Component {
     import Settings._
 
@@ -83,7 +81,7 @@ trait Views { this: MVC =>
     
     val cherryImg = ImageIO.read(new File("src/main/resources/cherry.png"))
 
-    def drawPoint(p: Point, g: Graphics2D) = {
+    def drawPoint(p: Thingy, g: Graphics2D) = {
       g.setColor(Color.GRAY)
 
 

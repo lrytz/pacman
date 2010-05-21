@@ -1,27 +1,35 @@
 package epfl.pacman
 package compiler
 
-import maze.MVC
 import tools.nsc.{Global, Settings}
 import tools.nsc.io.VirtualDirectory
 import tools.nsc.interpreter.AbstractFileClassLoader
-import tools.nsc.util.{ScalaClassLoader, BatchSourceFile}
-import tools.util.PathResolver
+import tools.nsc.reporters.AbstractReporter
+import java.lang.String
+import tools.nsc.util.{Position => FilePosition, BatchSourceFile}
+import collection.mutable.{Set, HashSet}
+import maze.MVC
+import behaviour.Behavior
 
-class BehaviorCompiler(mvc: MVC) {
+abstract class BehaviorCompiler {
+
+  val mvc: MVC
+  
   private val template =
 """package epfl.pacman
 package behaviour
 
 import maze.MVC
 
-class SubBehaviors(val mvc: MVC) {
-  import mvc._
-  class SubPacManBehavior extends PacManBehavior {
-    def getMethod(model: Model, p: PacMan) = {
+object Factory {
+  // could use dependent method type
+  def create(theMVC: MVC): Behavior = new Behavior {
+    val mvc = theMVC
+    import mvc._
+    def getMethod(model: Model, p: Figure) = {
       new NextMethod(model, p) {
         def apply = {
-           %s
+          %s
         }
       }
     }
@@ -38,14 +46,48 @@ class SubBehaviors(val mvc: MVC) {
     pathOf(this.getClass) +":"+ pathOf(classOf[ScalaObject]) +":"+ pathOf(classOf[Global])
   }
 
-  val outDir = new VirtualDirectory("(memory)", None)
+  private val outDir = new VirtualDirectory("(memory)", None)
   settings.outputDirs.setSingleOutput(outDir)
 
-  // output to VirtualDirectory
+  private val reporter = new AbstractReporter {
+    val settings = BehaviorCompiler.this.settings
 
-  private val global = new Global(settings)
+    val errorPositions: Set[FilePosition] = new HashSet()
 
-  def compile(body: String, finish: () => Unit) {
+    override def reset {
+      errorPositions.clear()
+      super.reset
+    }
+
+    def display(pos: FilePosition, msg: String, severity: Severity) {
+      println(msg)
+      printSourceLine(pos)
+      severity.count += 1
+      if (severity == ERROR)
+        errorPositions += pos
+    }
+
+   def printSourceLine(pos: FilePosition) {
+     println(pos.lineContent.stripLineEnd)
+     printColumnMarker(pos)
+   }
+
+   def printColumnMarker(pos: FilePosition) =
+     if (pos.isDefined) { println(" " * (pos.column - 1) + "^") }
+
+
+    def displayPrompt {
+      fatal()
+    }
+
+    def fatal() {
+
+    }
+  }
+
+  private val global = new Global(settings, reporter)
+
+  def compile(body: String, enableGui: () => Unit) {
     val t = new Thread() {
       override def run() {
 
@@ -54,22 +96,30 @@ class SubBehaviors(val mvc: MVC) {
         val file = new BatchSourceFile("<behavior>", source)
         run.compileSources(List(file))
 
-        val parent = this.getClass.getClassLoader
-        val classLoader = new AbstractFileClassLoader(outDir, parent)
+        if (reporter.hasErrors) {
+          val text = reporter.errorPositions.map(p => p.line).mkString("\n")
+          println(text)
+          swing.Swing.onEDT {
+            mvc.controller ! mvc.Resume
+            enableGui()
+          }
+        } else {
+          val parent = this.getClass.getClassLoader
+          val classLoader = new AbstractFileClassLoader(outDir, parent)
 
-        val behaviors = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors")
-        val behaviorsConstr = behaviors.getConstructors.apply(0)
-        val behaviorsInst = behaviorsConstr.newInstance(mvc).asInstanceOf[AnyRef]
+          val mvcClass = classOf[MVC]
 
-        val behavior = classLoader.findClass("epfl.pacman.behaviour.SubBehaviors$SubPacManBehavior")
-        val behaviorConstr = behavior.getConstructors.apply(0)
-        val behaviorInst = behaviorConstr.newInstance(behaviorsInst).asInstanceOf[mvc.PacManBehavior]
+          val behavior = classLoader.findClass("epfl.pacman.behaviour.Factory")
+          val m = behavior.getMethod("create", mvcClass)
+          val behaviorInst = m.invoke(null, mvc).asInstanceOf[Behavior { val mvc: BehaviorCompiler.this.mvc.type }]
 
-        swing.Swing.onEDT {
-          mvc.controller ! mvc.Load(behaviorInst)
-          mvc.controller ! mvc.Resume
-          finish()
+          swing.Swing.onEDT {
+            mvc.controller ! mvc.Load(behaviorInst)
+            mvc.controller ! mvc.Resume
+            enableGui()
+          }
         }
+        reporter.reset
       }
     }
     t.start()

@@ -8,7 +8,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     val mvc = new MVC
 
-    new interface.PacmanApp(mvc).main(args)
+    mvc.gui.main(args)
 
     mvc.controller.start()
     Thread.sleep(2000)

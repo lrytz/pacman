@@ -1,7 +1,7 @@
 package epfl.pacman
 package maze
 
-trait Directions { this: MVC =>
+trait Directions { this: Models =>
   
   /**
    * 0 Up

@@ -1,13 +1,11 @@
 package epfl.pacman
 package maze
 
-trait Models { this: MVC =>
+trait Models extends Thingies with Positions with Directions { this: MVC =>
 
-  var model: Model
+  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], points: Set[Thingy], paused: Boolean) {
 
-  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], points: Set[Point], paused: Boolean) {
-
-    def this() = this(new PacMan(new OffsetPosition(14, 10), true,  Right, Hunted, Angle(30)), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
+    def this() = this(new PacMan(new OffsetPosition(14, 10), Right), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
 
     def randomizeFigures() = {
       import scala.util.Random.nextInt
@@ -19,37 +17,143 @@ trait Models { this: MVC =>
         p
       }
       val newMonsters = monsters map (m => m.copy(getPos(Set())))
-      copy(pacman.copy(getPos(newMonsters)), newMonsters, walls, points = ModelDefaults.points, false)
+      copy(pacman.copy(getPos(newMonsters)), newMonsters, points = ModelDefaults.points)
     }
 
+    private val wallCache = Set[BlockPosition]() ++ walls.map(_.pos)
+    def isWallAt(pos: Position) = wallCache.contains(pos)
 
-    val wallCache = Set[BlockPosition]() ++ walls.map(_.pos)
 
-    def isWallAt(pos: Position) = wallCache.contains(pos) // walls.exists(_.pos == pos)
+    // all viable blocks
+    private val allPos = (for (x <- 0 to (Settings.hBlocks-1); y <- 0 to (Settings.vBlocks-1)) yield BlockPosition(x, y)).toSet -- wallCache
+    private val g = new Graph
 
-    def clearPathBetween(from: Figure, to: Figure) = {
-        // check whether <from> can "see" <to>
-        if (from.pos.x == to.pos.x) {
-            (from.pos.y.min(to.pos.y) to from.pos.y.max(to.pos.y)).forall(y =>
-                !isWallAt(BlockPosition(from.pos.x, y))
-            )
-        } else if (from.pos.y == to.pos.y) {
-            (from.pos.x.min(to.pos.x) to from.pos.x.max(to.pos.x)).forall(x =>
-                !isWallAt(BlockPosition(x, from.pos.y))
-            )
-        } else {
-            false
+    // set up graph: add all nodes
+    for (p <- allPos) {
+      g.addNode(p)
+    }
+
+    // set up graph: connect notes
+    for (fromP <- allPos) {
+      for (toD <- List(Left, Right, Up, Down)) {
+        var toP = fromP.nextIn(toD)
+
+        if (!isWallAt(toP)) {
+          g.addEdge(fromP, toP)
         }
+      }
     }
+
+    /**
+     * ???
+     */
+    def randomValidPos = {
+      import scala.util.Random.nextInt
+      allPos.toSeq.apply(nextInt(allPos.size))
+    }
+
+    def minDistBetween(from: Position, to: Position): Int =
+      minDistBetween(from, Set(to))
+
+    /**
+     * ???
+     */
+    def minDistBetween(from: Position, to: Set[Position]): Int = {
+      g.markTargets(to)
+      val r = g.simpleDistFrom(from, 45)
+      g.clear
+      r
+    }
+
+    /**
+     * ???
+     */
+    def maxPathBetween(init: Position, dir: Direction, to: Set[Position]): Int = {
+      g.markTargets(to + init)
+      val r = g.maxPathFrom(init.nextIn(dir), 45)
+      g.clear
+      r
+    }
+
+    private class Graph {
+      case class Node(pos: Position, var color: Int = 0)
+      var nodes     = Map[Position, Node]()
+      var edgesFrom = Map[Node, Set[Node]]().withDefaultValue(Set())
+
+      def addNode(pos: Position) {
+        if (!(nodes contains pos)) {
+          nodes += (pos -> Node(pos))
+        } else {
+          error("Node "+pos+" already in")
+        }
+      }
+      def addEdge(from: Position, to: Position) {
+        val fromN = nodes(from)
+        val toN   = nodes(to)
+        edgesFrom += fromN -> (edgesFrom(fromN) + toN)
+      }
+
+      def markTargets(positions: Set[Position]) {
+        for (p <- positions) {
+          nodes(p).color = 2
+        }
+      }
+
+      def clear {
+        for ((p, n) <- nodes) {
+          n.color = 0
+        }
+      }
+
+      def simpleDistFrom(p: Position, max: Int): Int = {
+        var toVisit: Set[Node] = Set(nodes(p))
+        var dist = 0
+
+        while (!toVisit.isEmpty && dist < max) {
+          dist += 1
+          val toVisitBatch = toVisit
+          for (n <- toVisitBatch) {
+            if (n.color == 0) {
+              edgesFrom(n).foreach(toVisit += _)
+              n.color = 1;
+            } else if (n.color == 2) {
+              return dist;
+            }
+          }
+        }
+
+        dist min max
+      }
+
+      def maxPathFrom(p: Position, max: Int): Int = {
+        var toVisit: Set[Node] = Set(nodes(p))
+        var dist = 0
+
+        while (!toVisit.isEmpty && dist < max) {
+          dist += 1
+          val toVisitBatch = toVisit
+          for (n <- toVisitBatch) {
+            if (n.color == 0) {
+              edgesFrom(n).foreach(toVisit += _)
+              n.color = 1;
+            } else if (n.color == 2) {
+              // ignore this path
+            }
+          }
+        }
+
+        dist min max
+      }
+    }
+
   }
 
   object ModelDefaults {
     val monsters: Set[Monster] = {
-      Set() + Monster(new OffsetPosition(1,1),   false, Right, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(28,1),  false, Left, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(28,18), false, Left, new LaserSettings(true, 0)) +
-              Monster(new OffsetPosition(1,18),  false, Right, new LaserSettings(true, 0))
-
+      Set() + Monster(new OffsetPosition(1,1), Right) +
+              Monster(new OffsetPosition(28,1), Left) +
+              Monster(new OffsetPosition(28,18), Left) +
+              Monster(new OffsetPosition(1,18), Right)
     }
 
     val maze: Set[Wall] = {
@@ -101,18 +205,18 @@ trait Models { this: MVC =>
               (for(y <- 15 to 17; x <- 21 to 22)  yield w(x, y))
     }
 
-    val points: Set[Point] = {
+    val points: Set[Thingy] = {
       import scala.util.Random.nextInt
       val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
 
-      collection.immutable.ListSet[Point]() ++
-        (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
-          if (nextInt(100) < Settings.superPointsRatio) {
-            SuperPoint(new BlockPosition(x, y))
-          } else {
-            NormalPoint(new BlockPosition(x, y))
-          }
-        })
+      collection.immutable.ListSet[Thingy]() ++
+              (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
+                if (nextInt(100) < Settings.superPointsRatio) {
+                  SuperPoint(new BlockPosition(x, y))
+                } else {
+                  NormalPoint(new BlockPosition(x, y))
+                }
+              })
     }
   }
 }
