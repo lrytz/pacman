@@ -2,12 +2,11 @@ package epfl.pacman
 package interface
 
 import swing._
+import Swing._
 import event.ButtonClicked
 import java.awt.{Color, Insets}
 import maze.MVC
 import editor.ScalaPane
-import Swing._
-import compiler.BehaviorCompiler
 import behaviour.Behavior
 
 trait GUIs { this: MVC =>
@@ -18,22 +17,22 @@ trait GUIs { this: MVC =>
     //  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + view.width + 10
     //  val height = 10 + view.height + 10
 
+    val doc = new ScalaPane()
+    doc.preferredSize = (Settings.docTextWidth, view.height)
+
+    val code = new ScalaPane()
+    code.text = Behavior.defaultBehavior
+    code.keywords ++= Settings.keywords
+    code.preferredSize = (Settings.codeTextWidth, 0)
+
+    val runButton = new Button("Lancer!")
+
+    val pauseButton = new Button("Arreter...")
+
+
     def top = new MainFrame {
       title = "Scala Pacman"
       background = Color.BLACK
-
-      val doc = new ScalaPane()
-      doc.preferredSize = (Settings.docTextWidth, view.height)
-
-      val code = new ScalaPane()
-      code.text = Behavior.defaultBehavior
-      code.keywords ++= Settings.keywords
-      code.preferredSize = (Settings.codeTextWidth, 0)
-
-      val runButton = new Button("Lancer!")
-
-      val pauseButton = new Button("Arreter...")
-
 
       contents = new GridBagPanel {
         import GridBagPanel._
@@ -89,14 +88,7 @@ trait GUIs { this: MVC =>
           runButton.text = "Code en charge..."
           runButton.enabled = false
           pauseButton.enabled = false
-          val comp = new BehaviorCompiler {
-            val mvc: GUIs.this.type = GUIs.this
-          }
-          comp.compile(code.text, () => {
-            runButton.text = "Lancer!"
-            runButton.enabled = true
-            pauseButton.enabled = true
-          })
+          compiler.compile(code.text)
 
         case ButtonClicked(`pauseButton`) =>
           if (model.paused) {
@@ -110,6 +102,22 @@ trait GUIs { this: MVC =>
 
 
       maximize()
+    }
+
+    def unlock() {
+      runButton.text = "Lancer!"
+      runButton.enabled = true
+      pauseButton.enabled = true
+    }
+
+    def setErrors(errorLines: collection.Set[Int]) {
+      val lines = code.lines
+      for ((line, i) <- lines.zipWithIndex) {
+        // i is 0-based, line numbers start at 1
+        if (errorLines contains (i +1))
+          line.highlight
+      }
+      code.repaint()
     }
   }
 }

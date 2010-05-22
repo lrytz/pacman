@@ -2,6 +2,7 @@ package epfl.pacman
 package maze
 
 import epfl.pacman.interface.GUIs
+import compiler.BehaviorCompiler
 
 /*
 GENERAL COMPOSITION STRUCTURE
@@ -54,4 +55,8 @@ class MVC extends Models with Views with GUIs with Controllers {
   val view = new View()
   val gui = new PacmanApp()
   val controller = new Controller()
+
+  val compiler = new BehaviorCompiler {
+    val mvc: MVC.this.type = MVC.this
+  }
 }

@@ -36,6 +36,9 @@ object Factory {
   }
 }"""
 
+  // number of lines before user's text
+  private val errorOffset = 13
+
   private val settings = new Settings()
 
   settings.classpath.value = {
@@ -87,7 +90,7 @@ object Factory {
 
   private val global = new Global(settings, reporter)
 
-  def compile(body: String, enableGui: () => Unit) {
+  def compile(body: String) {
     val t = new Thread() {
       override def run() {
 
@@ -97,11 +100,13 @@ object Factory {
         run.compileSources(List(file))
 
         if (reporter.hasErrors) {
-          val text = reporter.errorPositions.map(p => p.line).mkString("\n")
+          val errorLines = reporter.errorPositions.map(_.line - errorOffset)
+          val text = errorLines.mkString("erroneous line(s): ", ", ", "")
           println(text)
           swing.Swing.onEDT {
             mvc.controller ! mvc.Resume
-            enableGui()
+            mvc.gui.setErrors(errorLines)
+            mvc.gui.unlock()
           }
         } else {
           val parent = this.getClass.getClassLoader
@@ -116,7 +121,7 @@ object Factory {
           swing.Swing.onEDT {
             mvc.controller ! mvc.Load(behaviorInst)
             mvc.controller ! mvc.Resume
-            enableGui()
+            mvc.gui.unlock()
           }
         }
         reporter.reset
