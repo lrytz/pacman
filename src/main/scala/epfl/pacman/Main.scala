@@ -14,5 +14,4 @@ object Main {
     Thread.sleep(2000)
     mvc.ticker.start()
   }
-
 }
