@@ -120,8 +120,6 @@ object Factory {
 
           swing.Swing.onEDT {
             mvc.controller ! mvc.Load(behaviorInst)
-            mvc.controller ! mvc.Resume
-            mvc.gui.unlock()
           }
         }
         reporter.reset

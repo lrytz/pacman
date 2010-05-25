@@ -39,9 +39,10 @@ trait Thingies { this: Models =>
                     dir: Direction,
                     stopped: Boolean = true,
                     mode: Mode = Hunted,
-                    angle: Angle = Angle(30)) extends Figure {
+                    angle: Angle = Angle(0),
+                    lives: Int = Settings.nbLives) extends Figure {
     def incrAngle {
-      angle.counter = (angle.counter + 1) % 60
+      angle.counter = (angle.counter + 2) % 60
     }
   }
 

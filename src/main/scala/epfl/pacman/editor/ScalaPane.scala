@@ -134,8 +134,9 @@ class ScalaPane extends Component { thisPane =>
 
     val normal: AttributeSet = {
       val s = new SimpleAttributeSet
-      StyleConstants.setForeground(s, Color.BLACK)
+      StyleConstants.setForeground(s, Color.WHITE)
       StyleConstants.setFontFamily(s, defaultFont)
+      StyleConstants.setFontSize(s, 14)
       s
     }
 
@@ -149,7 +150,7 @@ class ScalaPane extends Component { thisPane =>
     val keyword: AttributeSet = {
       val s = new SimpleAttributeSet
       StyleConstants.setBold(s, true)
-      StyleConstants.setForeground(s, Color.BLUE)
+      StyleConstants.setForeground(s, Color.GREEN)
       StyleConstants.setFontFamily(s, defaultFont)
       s
     }

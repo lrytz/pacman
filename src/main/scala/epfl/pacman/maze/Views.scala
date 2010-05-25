@@ -136,12 +136,12 @@ trait Views { this: MVC =>
         bborder = 5
       }
 
-      if (!model.isWallAt(w.pos.onLeft)) {
+      if (w.pos.x == 0 || !model.isWallAt(w.pos.onLeft)) {
         g.drawLine(x, y, x, y+blockSize)
         lborder = 3
       }
 
-      if (!model.isWallAt(w.pos.onRight)) {
+      if (w.pos.x == Settings.hBlocks-1 || !model.isWallAt(w.pos.onRight)) {
         g.drawLine(x+blockSize, y, x+blockSize, y+blockSize)
         rborder = 3
       }

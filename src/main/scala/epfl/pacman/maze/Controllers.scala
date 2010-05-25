@@ -9,22 +9,27 @@ import behaviour.{DefaultMonsterBehavior, DefaultPacManBehavior, Behavior}
 trait Controllers { mvc: MVC =>
 
   class Controller extends Actor {
-    var pacmanBehavior: Behavior { val mvc: Controllers.this.type } = new DefaultPacManBehavior {
+    private var pacmanBehavior: Behavior { val mvc: Controllers.this.type } = new DefaultPacManBehavior {
       val mvc: Controllers.this.type = Controllers.this
     }
 
-    val monsterBehavior = new DefaultMonsterBehavior {
+    private val monsterBehavior = new DefaultMonsterBehavior {
       val mvc: Controllers.this.type = Controllers.this
     }
 
-    // @TODO: maybe put these into the model?
-    private var tickCounter = 0
-    private var dieCounter = 0
-    private var hunterCounter = 0
-    private var revivals: List[(Int, Monster)] = Nil
+    private def tickCounter = model.counters('tick)
+    private def tickCounter_=(v: Int) { model.counters('tick) = v }
+    private def dieCounter = model.counters('die)
+    private def dieCounter_=(v: Int) { model.counters('die) = v }
+    private def hunterCounter = model.counters('hunter)
+    private def hunterCounter_=(v: Int) { model.counters('hunter) = v }
+    private object revivals {
+      def apply(m: Monster) = model.counters(m)
+      def update(m: Monster, v: Int) = model.counters(m) = v
+    }
 
-    def pause() { model = model.copy(paused = true) }
-    def resume() { model = model.copy(paused = false) }
+    private def pause() { model = model.copy(paused = true) }
+    private def resume() { model = model.copy(paused = false) }
 
     private def makeOffsetPosition(to: Position, dir: Direction, stopped: Boolean) = {
       val s = Settings.blockSize
@@ -44,7 +49,7 @@ trait Controllers { mvc: MVC =>
       OffsetPosition(donut(to.x, Settings.hBlocks), donut(to.y, Settings.vBlocks), xo, yo)
     }
 
-    @inline final def figureRect(f: Figure) = {
+    @inline private def figureRect(f: Figure) = {
       val pos = f.pos
       val s = Settings.blockSize
       new Rectangle(pos.x*s + pos.xo - 1, pos.y*s + pos.yo - 1, s + 2, s + 2)
@@ -82,6 +87,8 @@ trait Controllers { mvc: MVC =>
                   model.monsters
                 }
 
+                var newDeadMonsters = model.deadMonsters
+
                 var newPacman = model.pacman
 
                 if (hunterCounter > 0) {
@@ -89,16 +96,14 @@ trait Controllers { mvc: MVC =>
                 }
 
                 if (majorTick) {
-                  if(revivals.exists(_._1 == 0)) {
-                    for ((tick, monst) <- revivals if tick == 0) {
+                  for (m <- model.deadMonsters) {
+                    revivals(m) -= 1
+                    if (revivals(m) == 0) {
                       val pos = model.randomValidPos
-                      newMonsters += monst.copy(makeOffsetPosition(pos, Right, false),  Right, false, monst.laser.copy(status = false))
+                      newMonsters += m.copy(makeOffsetPosition(pos, Right, false),  Right, false, m.laser.copy(status = false))
+                      newDeadMonsters -= m
                     }
-                    revivals = revivals.filter(_._1 != 0)
                   }
-
-                  // decrement counters
-                  revivals = revivals.map(r => (r._1-1, r._2))
 
                   if (newPacman.mode == Hunter && hunterCounter == 0) {
                     newPacman = newPacman.copy(mode = Hunted)
@@ -120,7 +125,8 @@ trait Controllers { mvc: MVC =>
                 val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
                 newPacman = newPacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped)
 
-                model = model.copy(pacman = newPacman, monsters = newMonsters, points = newPoints)
+                model = model.copy(pacman = newPacman, monsters = newMonsters,
+                                   points = newPoints, deadMonsters = newDeadMonsters)
               }
 
               tickCounter -= 1
@@ -158,9 +164,18 @@ trait Controllers { mvc: MVC =>
               if (!omonst.isEmpty) {
                 if (model.pacman.mode == Hunter) {
                   // eat the monster
-                  model = model.copy(monsters = model.monsters - omonst.get)
-                  revivals = (nextInt(10)+10, omonst.get) :: revivals
+                  model = model.copy(monsters = model.monsters - omonst.get, deadMonsters = model.deadMonsters + omonst.get)
+                  revivals(omonst.get) = nextInt(10)+10
                 } else {
+                  if (model.simpleMode) {
+                    model = model.copy(message = Some("Game over..."))
+                  } else {
+                    if (model.pacman.lives > 0) {
+                      model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
+                    } else {
+                      model = model.copy(message = Some("Game over..."))
+                    }
+                  }
                   pause()
                   dieCounter = Settings.ticksToDie
                 }
@@ -170,9 +185,11 @@ trait Controllers { mvc: MVC =>
               dieCounter -= 1
               if (dieCounter == 0) {
                 tickCounter = 0
-                model = model.randomizeFigures()
-                view.repaint() // rull repaint to get rid of old figures
-                resume()
+                if (!model.simpleMode && model.pacman.lives > 0) {
+                  model = model.resetFigures()
+                  view.repaint() // full repaint to get rid of old figures
+                  resume()
+                }
               }
             }
 
@@ -185,10 +202,12 @@ trait Controllers { mvc: MVC =>
           case Load(newPacmanBehavior) =>
             //assert(model.paused, "trying to load new model while game is running")
             pacmanBehavior = newPacmanBehavior
+            gui.unlock()
+            gui.resume()
             resume()
 
-          case Error(line) =>
-            
+          case Reset(simpleMode) =>
+            model = new Model(simpleMode = simpleMode)
         }
       }
     }
@@ -207,6 +226,6 @@ trait Controllers { mvc: MVC =>
   case object Tick
   case object Pause
   case object Resume
+  case class Reset(simpleMode: Boolean)
   case class Load(pacmanBehavior: Behavior { val mvc: Controllers.this.type })
-  case class Error(line: Int)
 }

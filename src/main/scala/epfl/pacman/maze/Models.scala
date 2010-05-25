@@ -1,23 +1,23 @@
 package epfl.pacman
 package maze
 
+import collection.{mutable => mut, immutable => imm}
+
 trait Models extends Thingies with Positions with Directions { this: MVC =>
+  
+  case class Model(pacman: PacMan = ModelDefaults.pacman,
+                   monsters: Set[Monster] = ModelDefaults.monsters,
+                   walls: Set[Wall] = ModelDefaults.maze,
+                   points: Set[Thingy] = ModelDefaults.points,
+                   paused: Boolean = false,
+                   simpleMode: Boolean = true,
+                   deadMonsters: Set[Monster] = Set(),
+                   counters: Counters = new Counters(),
+                   message: Option[String] = None) {
 
-  case class Model(pacman: PacMan, monsters: Set[Monster], walls: Set[Wall], points: Set[Thingy], paused: Boolean) {
-
-    def this() = this(new PacMan(new OffsetPosition(14, 10), Right), ModelDefaults.monsters, ModelDefaults.maze, ModelDefaults.points, false)
-
-    def randomizeFigures() = {
-      import scala.util.Random.nextInt
-      def getPos(avoid: Set[Monster]): OffsetPosition = {
-        var p = OffsetPosition(0, 0)
-        do {
-          p = new OffsetPosition(nextInt(Settings.hBlocks), nextInt(Settings.vBlocks))
-        } while (isWallAt(p) || avoid.exists(m => m.pos == p))
-        p
-      }
-      val newMonsters = monsters map (m => m.copy(getPos(Set())))
-      copy(pacman.copy(getPos(newMonsters)), newMonsters, points = ModelDefaults.points)
+    def resetFigures() = {
+      copy(pacman = ModelDefaults.pacman.copy(lives = pacman.lives),
+           monsters = ModelDefaults.monsters, deadMonsters = Set())
     }
 
     private val wallCache = Set[BlockPosition]() ++ walls.map(_.pos)
@@ -77,8 +77,8 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
 
     private class Graph {
       case class Node(pos: Position, var color: Int = 0)
-      var nodes     = Map[Position, Node]()
-      var edgesFrom = Map[Node, Set[Node]]().withDefaultValue(Set())
+      var nodes     = imm.Map[Position, Node]()
+      var edgesFrom = imm.Map[Node, Set[Node]]().withDefaultValue(Set())
 
       def addNode(pos: Position) {
         if (!(nodes contains pos)) {
@@ -148,7 +148,16 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
 
   }
 
+  class Counters extends mut.HashMap[Any, Int] {
+    override def default(k: Any) = {
+      if (k == 'time) Settings.surviveTime
+      else 0
+    }
+  }
+
   object ModelDefaults {
+    val pacman = new PacMan(new OffsetPosition(14, 10), Right)
+
     val monsters: Set[Monster] = {
       Set() + Monster(new OffsetPosition(1,1), Right) +
               Monster(new OffsetPosition(28,1), Left) +
