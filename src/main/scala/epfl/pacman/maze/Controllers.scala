@@ -80,7 +80,7 @@ trait Controllers { mvc: MVC =>
                   // compute next block position if all the small steps have been painted
                   model.monsters.map(monster => {
                     val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                    val laserMode  = (model.minDistBetween(monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
+                    val laserMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
                     Monster(makeOffsetPosition(pos, dir, stopped), dir, stopped, monster.laser.copy(status = laserMode))
                   })
                 } else {

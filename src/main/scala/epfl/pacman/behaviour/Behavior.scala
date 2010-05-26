@@ -45,8 +45,8 @@ abstract class Behavior {
     def siChasseur = si(model.pacman.mode == Hunter) _
     def siChassé   = si(model.pacman.mode == Hunted) _
 
-    def siMonstresPrès = si(model.minDistBetween(model.pacman.pos, positions(model.monsters)) <  6) _
-    def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, positions(model.monsters)) >= 6) _
+    def siMonstresPrès = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) <  6) _
+    def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) >= 6) _
 
     def choisirParmis(dirs: Directions) : Directions = dirs
 
@@ -58,6 +58,19 @@ abstract class Behavior {
 
       Directions((ahead :: left :: right :: back :: Nil).collect{ case Some(pos) => pos }.toSet)
     }
+
+    private def distanceTo(to: Set[Position]): Int = {
+        withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 < b._2).head._2
+    }
+
+    def distanceVersCerise =
+        distanceTo(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos })
+
+    def distanceVersPoint =
+        distanceTo(Set[Position]() ++ model.points.map(_.pos))
+
+    def distanceVersMonstre =
+        distanceTo(Set[Position]() ++ model.monsters.map(_.pos))
 
     val Bouger = directions
     val bouger = directions
@@ -127,7 +140,7 @@ abstract class Behavior {
      */
 
     def minDistToVia(to: Set[Position], ds: Directions) = {
-      randomBestDir(withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 < b._2))
+      randomBestDir(withDistBetween(ds.dirs, to).sortWith((a, b) => a._2 < b._2))
     }
 
     def maxDistToVia(to: Set[Position], ds: Directions) = {
@@ -156,7 +169,7 @@ abstract class Behavior {
 
     def withDistBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
       directions.toSeq.map(dir =>
-        (dir, model.minDistBetween(c.pos.nextIn(dir), to))
+        (dir, model.minDistBetween(c.pos, c.pos.nextIn(dir), to))
       )
     }
 
@@ -196,6 +209,10 @@ abstract class Behavior {
      }
 
      def telQue = tellesQue _
+
+     def telque(cond: Filter) = {
+        cond(this)
+     }
 
      def ouAlors(body: => Directions) = {
         Condition(() => !dirs.isEmpty, () => this, Some(() => body))
