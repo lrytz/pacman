@@ -34,9 +34,13 @@ trait GUIs { this: MVC =>
     advancedMode.foreground = Color.WHITE
     val modeGroup = new ButtonGroup(simpleMode, advancedMode)
 
-    val pauseButton = new Button("Pause...")
+    val pauseButton = new Button("")
 
     val resetButton = new Button("Redémarrer...")
+
+    val statusTitle = new Label("")
+    statusTitle.foreground = Color.WHITE
+    statusTitle.font = new Font(statusTitle.font.getName, Font.BOLD, 14)
 
     val statusDisplay = new Component {
       preferredSize = (200, 10)
@@ -44,9 +48,22 @@ trait GUIs { this: MVC =>
       override def paintComponent(g: Graphics2D) {
         import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-        
-        g.setColor(Color.WHITE)
-        g.fillArc(50, 50, 100, 100, 0, 300)
+
+
+        if (model.simpleMode) {
+          val angle = model.counters('time)*360/Settings.surviveTime - 360
+          val rb = model.counters('time)*255/Settings.surviveTime
+          val cv = 0x00ff00 | (rb << 16) | rb
+          g.setColor(new Color(cv))
+          g.fillArc(50, 20, 100, 100, 90, angle)
+        } else {
+          g.setColor(Color.YELLOW)
+          var y = 20
+          for (i <- 0 until model.pacman.lives) {
+            g.fillArc(80, y, 40, 40, 30, 300)
+            y += 60
+          }
+        }
       }
     }
 
@@ -106,29 +123,43 @@ trait GUIs { this: MVC =>
           c.fill = Fill.Horizontal
           c.gridx = 0
           c.gridy = 0
-          c.insets = new Insets(10, 10, 5, 10) // top, left, bottom, right
-          layout(simpleMode) = c
+          c.insets = new Insets(10, 10, 15, 10) // top, left, bottom, right
+          val configLabel = new Label("Configuration")
+          configLabel.xAlignment = Alignment.Left
+          configLabel.foreground = Color.WHITE
+          configLabel.font = new Font(configLabel.font.getName, Font.BOLD, 18)
+          layout(configLabel) = c
 
           c.gridx = 0
           c.gridy = 1
+          c.insets = new Insets(5, 10, 5, 10)
+          layout(simpleMode) = c
+
+          c.gridx = 0
+          c.gridy = 2
           c.insets = new Insets(0, 10, 10, 10)
           layout(advancedMode) = c
 
           c.gridx = 0
-          c.gridy = 2
+          c.gridy = 3
           c.insets = new Insets(10, 10, 5, 10)
           layout(pauseButton) = c
 
           c.gridx = 0
-          c.gridy = 3
-          c.insets = new Insets(5, 10, 5, 10)
+          c.gridy = 4
+          c.insets = new Insets(5, 10, 10, 10)
           layout(resetButton) = c
+
+          c.gridx = 0
+          c.gridy = 5
+          c.insets = new Insets(80, 10, 10, 10)
+          layout(statusTitle) = c
 
           c.fill = Fill.Both
           c.gridx = 0
-          c.gridy = 4
+          c.gridy = 6
           c.weighty = 1.0
-          c.insets = new Insets(5, 10, 10, 10)
+          c.insets = new Insets(10, 10, 10, 10)
           layout(statusDisplay) = c
         }
         right.border = new javax.swing.border.LineBorder(Color.GRAY)
@@ -166,6 +197,7 @@ trait GUIs { this: MVC =>
     def update() {
       onEDT {
         view.repaint()
+        statusDisplay.repaint()
 
         val locked = model.state match {
           case Loading(_) => false
@@ -181,11 +213,17 @@ trait GUIs { this: MVC =>
 
         resetButton.enabled = locked
 
+        if (model.simpleMode) {
+          simpleMode.selected = true
+          statusTitle.text = "Temps pour sauvetage"
+        } else{
+          advancedMode.selected = true
+          statusTitle.text = "Vies restantes"
+        }
         simpleMode.enabled = locked
         advancedMode.enabled = locked
       }
     }
-
 
     def setErrors(errorLines: collection.Set[Int]) {
       val lines = code.lines

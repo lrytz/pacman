@@ -11,7 +11,7 @@ object Main {
     mvc.gui.main(args)
 
     mvc.controller.start()
-    Thread.sleep(2000)
+    Thread.sleep(1000)
     mvc.ticker.start()
   }
 }

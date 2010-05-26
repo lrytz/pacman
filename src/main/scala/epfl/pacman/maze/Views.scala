@@ -39,9 +39,10 @@ trait Views { this: MVC =>
       import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
       g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-      for (p <- model.points) {
-        drawPoint(p, g)
-      }
+      if (!model.simpleMode)
+        for (p <- model.points) {
+          drawPoint(p, g)
+        }
 
       for (m <- model.monsters) {
         drawMonster(m, g)
@@ -51,14 +52,20 @@ trait Views { this: MVC =>
 
 
       if (model.state != Running) {
-        g.setColor(new Color(0x44ffffff, true))
+        val cv = model.state match {
+          case GameOver => 0x44ff0000
+          case GameWon => 0x4400ff00
+          case _ => 0x44ffffff
+        }
+        g.setColor(new Color(cv, true))
         g.fillRect(0, 0, width, height)
 
         val msg = model.state match {
           case Paused => "Jeu en pause..."
           case Loading(_) => "Code en charge..."
           case GameOver => "Game over..."
-          case GameWon => "Jeu gagné, PacMan sauvé!"
+          case GameWon if model.simpleMode => "Jeu gagné, PacMan sauvé!"
+          case GameWon => "Jeu gangné!"
           case LifeLost(_) => "Vie perdu!"
           case CompileError(_) => "Code incorrect!"
         }

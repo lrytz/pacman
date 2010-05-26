@@ -21,6 +21,8 @@ trait Controllers { mvc: MVC =>
     private def tickCounter_=(v: Int) { model.counters('tick) = v }
     private def hunterCounter = model.counters('hunter)
     private def hunterCounter_=(v: Int) { model.counters('hunter) = v }
+    private def timeCounter = model.counters('time)
+    private def timeCounter_=(v: Int) { model.counters('time) = v }
     private object revivals {
       def apply(m: Monster) = model.counters(m)
       def update(m: Monster, v: Int) = model.counters(m) = v
@@ -83,34 +85,41 @@ trait Controllers { mvc: MVC =>
               // in hunter mode, we need to compute pacman's position more often
               if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.hunter)) {
 
-                if (hunterCounter > 0)
-                  hunterCounter -= 1
-
                 var newPacman = model.pacman
 
-                val p = model.points.find(p => p.pos == model.pacman.pos)
+                if (!model.simpleMode) {
+                  if (hunterCounter > 0)
+                    hunterCounter -= 1
 
-                // eat points before computing new position and making pacman hunted
-                val newPoints = if (!p.isEmpty) {
+                  val p = model.points.find(p => p.pos == model.pacman.pos)
+
+                  // eat points before computing new position and making pacman hunted
+                  val newPoints = if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
-                        newPacman = newPacman.copy(hunter = true)
-                        hunterCounter = Settings.ticksToHunt
+                      newPacman = newPacman.copy(hunter = true)
+                      hunterCounter = Settings.ticksToHunt
                     }
                     model.points - p.get
-                } else {
+                  } else {
                     model.points
-                }
+                  }
 
-                // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
-                if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {
-                  newPacman = newPacman.copy(hunter = false)
+                  model = model.copy(points = newPoints)
+
+                  if (newPoints.isEmpty)
+                    model = model.copy(state = GameWon)
+
+                  // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
+                  if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {
+                    newPacman = newPacman.copy(hunter = false)
+                  }
                 }
 
                 // update pacman's position
                 val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
                 newPacman = newPacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped)
 
-                model = model.copy(pacman = newPacman, points = newPoints)
+                model = model.copy(pacman = newPacman)
               }
 
 
@@ -145,6 +154,7 @@ trait Controllers { mvc: MVC =>
                *  - update pacman's offset
                *  - update monster's offsets
                *  - compute collisions
+               *  - check if time is over
                */
 
               tickCounter -= 1
@@ -193,11 +203,24 @@ trait Controllers { mvc: MVC =>
                     else
                       model = model.copy(state = GameOver)
                   }
+                  gui.update()
                 }
               }
 
+
+              // update time to win
+              if (model.simpleMode) {
+                timeCounter -= 1
+                gui.statusDisplay.repaint()
+                if (timeCounter == 0) {
+                  model = model.copy(state = GameWon)
+                  gui.update()
+                }
+              }
+
+
              } else {
-              // simulation is not running, update message counters, die conuter, etc
+              // simulation is not running, update gmae countdown, die conuter
 
               model.state match {
                 case l @ LifeLost(_) =>
@@ -254,8 +277,8 @@ trait Controllers { mvc: MVC =>
               case Loading(_) | CompileError(_) => ()
               case _ =>
                 model = new Model(simpleMode = simpleMode)
-                gui.update()
             }
+            gui.update()
         }
       }
     }

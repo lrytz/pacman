@@ -20,16 +20,13 @@ object Settings {
   val sleepTime = 15
 
   // time to survive for completing in simple mode
-  val surviveTime = ticks(60)
+  val surviveTime = ticks(30)
 
   // nb of lives available in advanced mode
   val nbLives = 3
 
   // time between getting eaten and re-starting the game
-  val dieTime = ticks(2)
-
-  // time for showing the "compilation error" message
-  val messageTime = ticks(3)
+  val dieTime = ticks(3)
 
   // number of half ticks (fast pacman's ticks) for the hunter mode to last
   val ticksToHunt = 16

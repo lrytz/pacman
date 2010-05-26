@@ -11,9 +11,9 @@ object Behavior {
   bouger telQue versLesMonstres
 } sinon {
   siMonstresLoin {
-     bouger telQue loinDesMonstres
+    bouger telQue versUnPoint
   } sinon {
-     bouger telQue loinDesMonstres
+    bouger telQue loinDesMonstres
   }
 }
 """
@@ -100,7 +100,7 @@ abstract class Behavior {
       maxDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
     }
 
-    def versUnPoints(ds: Directions): Directions = {
+    def versUnPoint(ds: Directions): Directions = {
       minDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
     }
 
@@ -246,9 +246,9 @@ abstract class DefaultPacManBehavior extends Behavior {
           bouger telQue versLesMonstres
         } sinon {
           siMonstresLoin {
-             bouger telQue loinDesMonstres
+            bouger telQue versUnPoint
           } sinon {
-             bouger telQue loinDesMonstres
+            bouger telQue loinDesMonstres
           }
         }
       }
