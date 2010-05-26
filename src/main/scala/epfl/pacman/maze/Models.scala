@@ -225,8 +225,8 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
     val monsters: Set[Monster] = {
       Set() + Monster(new OffsetPosition(1,1), Right,  Info) +
               Monster(new OffsetPosition(28,1), Left,  Info) +
-              Monster(new OffsetPosition(28,18), Left, Cerbero) +
-              Monster(new OffsetPosition(1,18), Right, Cerbero)
+              Monster(new OffsetPosition(28,18), Left, Cerebro) +
+              Monster(new OffsetPosition(1,18), Right, Cerebro)
     }
 
     val maze: Set[Wall] = {

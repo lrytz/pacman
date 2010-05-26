@@ -141,20 +141,18 @@ trait Views { this: MVC =>
                       "src/main/resources/badguy1-2.png" ::
                       "src/main/resources/badguy1-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
 
-    val imagesCerbero = ("src/main/resources/badguy2-0.png" ::
+    val imagesCerebro = ("src/main/resources/badguy2-0.png" ::
                          "src/main/resources/badguy2-1.png" ::
                          "src/main/resources/badguy2-2.png" ::
                          "src/main/resources/badguy2-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
 
     def drawMonster(m: Monster, g: Graphics2D) = {
-      val xOffset = 3
-      val yOffset = 6
 
-      val images = m.typ match {
+      val (images, xOffset, yOffset) = m.typ match {
         case Info =>
-          imagesInfo
-        case Cerbero =>
-          imagesCerbero
+          (imagesInfo, 3, 6)
+        case Cerebro =>
+          (imagesCerebro, 2, 6)
       }
 
       val img = if (m.anim.status) { images((m.anim.animOffset/2 % (images.size-1)) + 1) } else { images(0) }

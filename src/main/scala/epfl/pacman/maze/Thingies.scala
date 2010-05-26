@@ -48,7 +48,7 @@ trait Thingies { this: Models =>
    */
 
   sealed abstract class MonsterTyp
-  object Cerbero extends MonsterTyp
+  object Cerebro extends MonsterTyp
   object Info extends MonsterTyp
 
   case class AnimationSettings(var status: Boolean, var animOffset: Int)
