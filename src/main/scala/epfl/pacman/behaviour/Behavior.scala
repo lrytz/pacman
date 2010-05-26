@@ -1,24 +1,30 @@
 package epfl.pacman
 package behaviour
 
+import scala.util.Random.{nextInt => randomInt}
+
 import maze.MVC
 
 object Behavior {
   def defaultBehavior =
-"""siChasseur {
-  directionVersLesMonstres
+"""
+siChasseur {
+  bouger telQue versLesMonstres
 } sinon {
   siMonstresLoin {
-    directionLoinDesMonstres
+     bouger telQue loinDesMonstres
   } sinon {
-    cheminLoinDesMonstres
+     bouger telQue loinDesMonstres
   }
-}"""
+}
+"""
 }
 
 abstract class Behavior {
   val mvc: MVC
   import mvc._
+
+  type Filter = Directions => Directions
 
   abstract class NextMethod(model: Model, c: Figure) extends Function0[Option[Direction]] {
 
@@ -27,25 +33,22 @@ abstract class Behavior {
     /**
      * Exposed DSL
      */
-    def siChasseur(body: => Directions): Condition = {
-        Condition(() => model.pacman.mode == Hunter, () => body)
+    def si(cond: => Boolean)(body: => Directions): Condition = {
+        Condition(() => cond, () => body)
     }
 
-    def siChassé(body: => Directions): Condition = {
-        Condition(() => model.pacman.mode == Hunted, () => body)
-    }
+    def alterner(weight: Int) =
+        si(weight > randomInt(100)) _
 
-    def siMonstresPrès(body: => Directions) : Condition = {
-        Condition(() => model.minDistBetween(model.pacman.pos, positions(model.monsters)) < 6, () => body)
-    }
+    def auHasard = alterner(50)
 
-    def siMonstresLoin(body: => Directions) : Condition = {
-        Condition(() => model.minDistBetween(model.pacman.pos, positions(model.monsters)) >= 6, () => body)
-    }
+    def siChasseur = si(model.pacman.mode == Hunter) _
+    def siChassé   = si(model.pacman.mode == Hunted) _
+
+    def siMonstresPrès = si(model.minDistBetween(model.pacman.pos, positions(model.monsters)) <  6) _
+    def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, positions(model.monsters)) >= 6) _
 
     def choisirParmis(dirs: Directions) : Directions = dirs
-
-    def retourne: Directions = Directions(Set(c.dir.opposite))
 
     def directions: Directions = {
       val ahead = nextOpt(c.dir)
@@ -56,6 +59,11 @@ abstract class Behavior {
       Directions((ahead :: left :: right :: back :: Nil).collect{ case Some(pos) => pos }.toSet)
     }
 
+    val Bouger = directions
+    val bouger = directions
+
+    val Rester = NoDirections
+
     def directionsEnAvant: Directions = {
       val ahead = nextOpt(c.dir)
       val left  = nextOpt(c.dir.left)
@@ -64,33 +72,46 @@ abstract class Behavior {
       Directions((ahead :: left :: right :: Nil).collect{ case Some(pos) => pos }.toSet)
     }
 
-    def directionLoinDesMonstres: Directions = {
-      maxDistTo(Set[Position]() ++ model.monsters.map(_.pos))
+    def enAvant(ds: Directions): Directions = {
+      Directions(directionsEnAvant.dirs & ds.dirs)
     }
 
-    def cheminLoinDesMonstres: Directions = {
-      maxPathTo(Set[Position]() ++ model.monsters.map(_.pos))
+    def loinDesMonstres(ds: Directions): Directions = {
+      maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, model.pacman.dir, 1.5)
     }
 
-    def directionVersLesMonstres: Directions = {
-      minDistTo(Set[Position]() ++ model.monsters.map(_.pos))
+    def versLesMonstres(ds: Directions): Directions = {
+      minDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds)
     }
 
-    def directionVersPacMan: Directions = {
-      minDistTo(Set[Position](model.pacman.pos))
+    def loinDesPoints(ds: Directions): Directions = {
+      maxDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
     }
 
-    def directionLoinDePacMan: Directions = {
-      maxDistTo(Set[Position](model.pacman.pos))
+    def versUnPoints(ds: Directions): Directions = {
+      minDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
+    }
+
+    def loinDesCerises(ds: Directions): Directions = {
+      maxDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+    }
+
+    def versUneCerise(ds: Directions): Directions = {
+      minDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+    }
+
+    def versPacMan(ds: Directions): Directions = {
+      minDistToVia(Set[Position](model.pacman.pos), ds)
+    }
+
+    def loinDePacMan(ds: Directions): Directions = {
+      maxDistToVia(Set[Position](model.pacman.pos), ds)
     }
 
     val Droite = new Directions(Set(Right))
     val Gauche = new Directions(Set(Left))
     val Bas    = new Directions(Set(Down))
     val Haut   = new Directions(Set(Up))
-
-    val Rester = new Directions(Set())
-
 
     /**
      * @TODO: add to dsl
@@ -105,24 +126,26 @@ abstract class Behavior {
      * Internal stuff
      */
 
-    def minDistTo(to: Set[Position]) = {
+    def minDistToVia(to: Set[Position], ds: Directions) = {
       randomBestDir(withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 < b._2))
     }
 
-    def maxDistTo(to: Set[Position]) = {
-      randomBestDir(withDistBetween(directions.dirs, to).sortWith((a, b) => a._2 > b._2))
+    def maxDistToVia(to: Set[Position], ds: Directions) = {
+      randomBestDir(withDistBetween(ds.dirs, to).sortWith((a, b) => a._2 > b._2))
     }
 
-    def maxPathTo(to: Set[Position]) = {
-      randomBestDir(withPathBetween(directionsEnAvant.dirs, to).sortWith((a, b) => a._2 > b._2))
+    def maxWeightedDistToVia(to: Set[Position], ds: Directions, dir: Direction, weight: Double) = {
+      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (d._1 == dir) (d._2*weight).toInt else d._2)).sortWith((a, b) => a._2 > b._2))
+    }
+
+    def maxPathToVia(to: Set[Position], ds: Directions) = {
+      randomBestDir(withPathBetween(ds.dirs, to).sortWith((a, b) => a._2 > b._2))
     }
 
     def randomBestDir(positions: Seq[(Direction, Int)]): Directions = {
-      import scala.util.Random.nextInt
-
       val best = positions.filter(_._2 == positions.head._2)
 
-      Directions(Set[Direction]() + best(nextInt(best.size))._1)
+      Directions(Set[Direction]() + best(randomInt(best.size))._1)
     }
 
     def withPathBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
@@ -161,17 +184,18 @@ abstract class Behavior {
         if(cond()) {
             then()
         } else {
-            elze.map(el => el()).getOrElse(NoDirections)
+            elze.map(el => el()).getOrElse(error("No else!"))
         }
     }
   }
 
   case class Directions(dirs: Set[Direction]) {
-     def telQue(cond: Direction => Boolean) = tellesQue(cond)
 
-     def tellesQue(cond: Direction => Boolean) = {
-        Directions(dirs filter cond)
+     def tellesQue(cond: Filter) = {
+        cond(this)
      }
+
+     def telQue = tellesQue _
 
      def ouAlors(body: => Directions) = {
         Condition(() => !dirs.isEmpty, () => this, Some(() => body))
@@ -179,8 +203,6 @@ abstract class Behavior {
   }
 
   object NoDirections extends Directions(Set())
-
-
 
   /**
    * Some implicit magic to make it all work smoothly
@@ -205,12 +227,12 @@ abstract class DefaultPacManBehavior extends Behavior {
     new NextMethod(model, p) {
       def apply = {
         siChasseur {
-          directionVersLesMonstres
+          bouger telQue versLesMonstres
         } sinon {
           siMonstresLoin {
-             directionLoinDesMonstres
+             bouger telQue loinDesMonstres
           } sinon {
-             cheminLoinDesMonstres
+             bouger telQue loinDesMonstres
           }
         }
       }
@@ -224,9 +246,13 @@ abstract class DefaultMonsterBehavior extends Behavior {
     new NextMethod(model, p) {
       def apply = {
         siChasseur {
-          directionLoinDePacMan
+          bouger telQue loinDePacMan
         } sinon {
-          directionVersPacMan
+          auHasard {
+              bouger telQue versPacMan
+          } sinon {
+              bouger telQue enAvant
+          }
         }
       }
     }

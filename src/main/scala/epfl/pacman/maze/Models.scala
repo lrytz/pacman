@@ -34,7 +34,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       g.addNode(p)
     }
 
-    // set up graph: connect notes
+    // set up graph: connect nodes
     for (fromP <- allPos) {
       for (toD <- List(Left, Right, Up, Down)) {
         var toP = fromP.nextIn(toD)
@@ -220,7 +220,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
 
       collection.immutable.ListSet[Thingy]() ++
-              (for (x <- 0 to 30; y <- 0 to 20 if !(wallsPos contains BlockPosition(x, y))) yield {
+              (for (x <- 0 to 29; y <- 0 to 19 if !(wallsPos contains BlockPosition(x, y))) yield {
                 if (nextInt(100) < Settings.superPointsRatio) {
                   SuperPoint(new BlockPosition(x, y))
                 } else {
