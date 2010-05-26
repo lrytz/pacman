@@ -89,7 +89,7 @@ abstract class Behavior {
     }
 
     def loinDesMonstres(ds: Directions): Directions = {
-      maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, model.pacman.dir, 5)
+      maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, directionsEnAvant, 5)
     }
 
     def versLesMonstres(ds: Directions): Directions = {
@@ -146,8 +146,8 @@ abstract class Behavior {
       randomBestDir(withDistBetween(ds.dirs, to).sortWith((a, b) => a._2 > b._2))
     }
 
-    def maxWeightedDistToVia(to: Set[Position], ds: Directions, dir: Direction, weight: Double) = {
-      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (d._1 == dir) (d._2+weight).toInt else d._2)).sortWith((a, b) => a._2 > b._2))
+    def maxWeightedDistToVia(to: Set[Position], ds: Directions, weightedDirs: Directions, weight: Int) = {
+      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (weightedDirs.dirs contains d._1) d._2+weight else d._2)).sortWith((a, b) => a._2 > b._2))
     }
 
     def maxPathToVia(to: Set[Position], ds: Directions) = {
