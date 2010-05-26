@@ -13,9 +13,10 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
                    simpleMode: Boolean = true,
                    deadMonsters: Set[Monster] = Set(),
                    counters: Counters = new Counters(),
-                   message: Option[String] = None) {
+                   message: String = "Jeu en pause...") {
 
     def resetFigures() = {
+      counters.clear()
       copy(pacman = ModelDefaults.pacman.copy(lives = pacman.lives),
            monsters = ModelDefaults.monsters, deadMonsters = Set())
     }
@@ -214,7 +215,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
               (for(y <- 15 to 17; x <- 21 to 22)  yield w(x, y))
     }
 
-    val points: Set[Thingy] = {
+    def points: Set[Thingy] = {
       import scala.util.Random.nextInt
       val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
 

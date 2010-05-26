@@ -3,10 +3,10 @@ package maze
 
 import javax.imageio.ImageIO
 import java.io.File
-import java.awt.{Graphics2D, Color}
 import java.awt.image.BufferedImage
 import swing._
 import Swing._
+import java.awt.{Font, Graphics2D, Color}
 
 trait Views { this: MVC =>
 
@@ -48,6 +48,28 @@ trait Views { this: MVC =>
       }
 
       drawPacman(model.pacman, g)
+
+
+      if (model.paused) {
+        g.setColor(new Color(0x44ffffff, true))
+        g.fillRect(0, 0, width, height)
+
+        val msg = model.message
+
+        val font = new Font("Dialog", Font.BOLD, 24)
+        g.setFont(font)
+        val metrics = g.getFontMetrics(font)
+        val (w, h) = (metrics.stringWidth(msg), metrics.getHeight)
+
+        g.setColor(new Color(0xccffffff, true))
+        val (padX, padY) = (20, 10)
+        val (x, y) = ((width - w - padX) / 2 , (height - h - padY) / 2)
+        g.fillRoundRect(x, y, w + padX, h + padY, 20, 20)
+
+        g.setColor(Color.BLACK)
+        val yOff = (metrics.getAscent() - metrics.getDescent()) / 2
+        g.drawString(msg, (width - w) / 2, height / 2 + yOff)
+      }
     }
 
     @inline final def toAbs(x: Int, o: Int = 0) = x * blockSize + o

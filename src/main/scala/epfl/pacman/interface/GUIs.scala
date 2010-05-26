@@ -17,24 +17,20 @@ trait GUIs { this: MVC =>
     //  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + view.width + 10
     //  val height = 10 + view.height + 10
 
-//    val doc = new ScalaPane()
-//    doc.preferredSize = (Settings.docTextWidth, view.height)
-
     val code = new ScalaPane()
     code.background = Color.BLACK
     code.peer.setCaretColor(Color.WHITE)
     code.text = Behavior.defaultBehavior
     code.keywords ++= Settings.keywords
     code.preferredSize = (Settings.codeTextWidth, 0)
-//    code.border = new javax.swing.border.LineBorder(Color.GRAY)
     code.notifyUpdate()
 
-    val runButton = new Button("Charger nouveu Code!")
+    val runButton = new Button("Compiler nouveu Code!")
 
     val simpleMode = new RadioButton("Mode simple")
     simpleMode.foreground = Color.WHITE
     simpleMode.selected = true
-    val advancedMode = new RadioButton("Mode anancé")
+    val advancedMode = new RadioButton("Mode avancé")
     advancedMode.foreground = Color.WHITE
     val modeGroup = new ButtonGroup(simpleMode, advancedMode)
 
@@ -55,8 +51,6 @@ trait GUIs { this: MVC =>
     }
 
 
-//    var progressDialog: javax.swing.JDialog = null
-
     def top = new MainFrame {
       title = "Scala Pacman"
       background = Color.BLACK
@@ -64,12 +58,6 @@ trait GUIs { this: MVC =>
       contents = new GridBagPanel {
         import GridBagPanel._
         val c = new Constraints
-
-//        c.fill = Fill.None
-//        c.gridx = 0
-//        c.gridy = 0
-//        c.insets = new Insets(10, 10, 10, 5)
-//        layout(doc) = c
 
         val left = new GridBagPanel {
           val c = new Constraints
@@ -97,11 +85,6 @@ trait GUIs { this: MVC =>
           c.weighty = 0.0
           c.insets = new Insets(5, 10, 10, 10)
           layout(runButton) = c
-
-//          c.gridx = 0
-//          c.gridy = 2
-//          c.insets = new Insets(0, 0, 0, 0)
-//          layout(pauseButton) = c
         }
         left.border = new javax.swing.border.LineBorder(Color.GRAY)
 
@@ -147,11 +130,6 @@ trait GUIs { this: MVC =>
           c.weighty = 1.0
           c.insets = new Insets(5, 10, 10, 10)
           layout(statusDisplay) = c
-
-//          c.gridx = 0
-//          c.gridy = 2
-//          c.insets = new Insets(0, 0, 0, 0)
-//          layout(pauseButton) = c
         }
         right.border = new javax.swing.border.LineBorder(Color.GRAY)
 
@@ -167,18 +145,25 @@ trait GUIs { this: MVC =>
       listenTo(runButton, pauseButton, resetButton, simpleMode, advancedMode)
       reactions += {
         case ButtonClicked(`runButton`) =>
-          controller ! Pause
+
+          // if model.gameOver: do a reset first
+
+          controller ! Pause("Code en Charge...")
           compiler.compile(code.text)
+          code.requestFocus()
           pause()
           lock()
 
         case ButtonClicked(`pauseButton`) =>
+
+          // if model.gameOver: do nothing
+
           if (model.paused) {
             resume()
             controller ! Resume
           } else {
             pause()
-            controller ! Pause
+            controller ! Pause()
           }
 
         case ButtonClicked(`resetButton`) =>
@@ -192,6 +177,21 @@ trait GUIs { this: MVC =>
       maximize()
     }
 
+ /*   def update() {
+      val locked = model.State != Loading
+      runButton.enabled = locked
+
+      pauseButton.text =
+        if (model.state == Paused) "Continuer..."
+        else "Pause..."
+      pauseButton.enabled = locked
+
+      resetButton.enabled = locked
+
+      simpleMode.enabled = locked
+      advancedMode.enabled = locked
+    }
+*/
     def pause() {
       pauseButton.text = "Continuer..."
     }
@@ -208,22 +208,17 @@ trait GUIs { this: MVC =>
     }
 
     def lock() {
-      runButton.text = "Code en charge..."
       runButton.enabled = false
       pauseButton.enabled = false
       resetButton.enabled = false
-//      progressDialog = new javax.swing.JDialog(null: java.awt.Frame, true)
-//      progressDialog.setVisible(true)
     }
 
     def unlock() {
-      runButton.text = "Charger nouveau Code!"
       runButton.enabled = true
       pauseButton.enabled = true
       resetButton.enabled = true
-//      progressDialog.dispose()
-//      progressDialog = null
     }
+
 
     def setErrors(errorLines: collection.Set[Int]) {
       val lines = code.lines

@@ -24,7 +24,7 @@ object Settings {
   val surviveTime = 300
 
   // number of ticks between getting eaten and re-starting the game
-  val ticksToDie = 60
+  val ticksToDie = 200
 
   // number of major ticks for the hunter mode to last
   val ticksToHunt = 16

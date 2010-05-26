@@ -28,7 +28,7 @@ trait Controllers { mvc: MVC =>
       def update(m: Monster, v: Int) = model.counters(m) = v
     }
 
-    private def pause() { model = model.copy(paused = true) }
+    private def pause(msg: String) { model = model.copy(paused = true, message = msg) }
     private def resume() { model = model.copy(paused = false) }
 
     private def makeOffsetPosition(to: Position, dir: Direction, stopped: Boolean) = {
@@ -167,16 +167,18 @@ trait Controllers { mvc: MVC =>
                   model = model.copy(monsters = model.monsters - omonst.get, deadMonsters = model.deadMonsters + omonst.get)
                   revivals(omonst.get) = nextInt(10)+10
                 } else {
-                  if (model.simpleMode) {
-                    model = model.copy(message = Some("Game over..."))
-                  } else {
-                    if (model.pacman.lives > 0) {
-                      model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
+                  val msg =
+                    if (model.simpleMode) {
+                      "Game over..."
                     } else {
-                      model = model.copy(message = Some("Game over..."))
+                      model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
+                      if (model.pacman.lives > 0) {
+                        "Vie perdu!"
+                      } else {
+                        "Game over..."
+                      }
                     }
-                  }
-                  pause()
+                  pause(msg)
                   dieCounter = Settings.ticksToDie
                 }
               }
@@ -184,7 +186,6 @@ trait Controllers { mvc: MVC =>
             } else if (dieCounter > 0) {
               dieCounter -= 1
               if (dieCounter == 0) {
-                tickCounter = 0
                 if (!model.simpleMode && model.pacman.lives > 0) {
                   model = model.resetFigures()
                   view.repaint() // full repaint to get rid of old figures
@@ -193,14 +194,15 @@ trait Controllers { mvc: MVC =>
               }
             }
 
-          case Pause =>
-            pause()
+          case Pause(msg) =>
+            pause(msg)
+            view.repaint()
 
           case Resume =>
             resume()
+            view.repaint()
 
           case Load(newPacmanBehavior) =>
-            //assert(model.paused, "trying to load new model while game is running")
             pacmanBehavior = newPacmanBehavior
             gui.unlock()
             gui.resume()
@@ -224,8 +226,9 @@ trait Controllers { mvc: MVC =>
 
 
   case object Tick
-  case object Pause
+  case class Pause(msg: String = "Jeu en pause...")
   case object Resume
   case class Reset(simpleMode: Boolean)
+  case class Compile(code: String)
   case class Load(pacmanBehavior: Behavior { val mvc: Controllers.this.type })
 }
