@@ -69,7 +69,11 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
      */
     def minDistBetween(init: Position, from: Position, to: Set[Position]): Int = {
       g.markTargets(to)
-      g.mark(init)
+      if (init != from) {
+        //exclude init position
+        g.mark(init)
+      }
+
       val r = g.simpleDistFrom(from, 45)
       g.clear
       r
