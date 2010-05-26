@@ -23,7 +23,7 @@ trait GUIs { this: MVC =>
     code.text = Behavior.defaultBehavior
     code.keywords ++= Settings.keywords
     code.preferredSize = (Settings.codeTextWidth, 0)
-    code.notifyUpdate()
+    //code.notifyUpdate() // should highlight existing text, doesnt' work..
 
     val runButton = new Button("Compiler nouveu Code!")
 
@@ -145,78 +145,45 @@ trait GUIs { this: MVC =>
       listenTo(runButton, pauseButton, resetButton, simpleMode, advancedMode)
       reactions += {
         case ButtonClicked(`runButton`) =>
-
-          // if model.gameOver: do a reset first
-
-          controller ! Pause("Code en Charge...")
-          compiler.compile(code.text)
           code.requestFocus()
-          pause()
-          lock()
+          controller ! Compile(code.text)
 
         case ButtonClicked(`pauseButton`) =>
-
-          // if model.gameOver: do nothing
-
-          if (model.paused) {
-            resume()
-            controller ! Resume
-          } else {
-            pause()
-            controller ! Pause()
-          }
+          controller ! Pause
 
         case ButtonClicked(`resetButton`) =>
-          reset(true)
+          controller ! Reset(simpleMode.selected)
 
         case ButtonClicked(`simpleMode`) | ButtonClicked(`advancedMode`) =>
-          reset(false)
+          if (model.simpleMode != simpleMode.selected)
+            controller ! Reset(simpleMode.selected)
       }
 
-
+      update()
       maximize()
     }
 
- /*   def update() {
-      val locked = model.State != Loading
-      runButton.enabled = locked
+    def update() {
+      onEDT {
+        view.repaint()
 
-      pauseButton.text =
-        if (model.state == Paused) "Continuer..."
-        else "Pause..."
-      pauseButton.enabled = locked
+        val locked = model.state match {
+          case Loading(_) => false
+          case _ => true
+        }
 
-      resetButton.enabled = locked
+        runButton.enabled = locked
 
-      simpleMode.enabled = locked
-      advancedMode.enabled = locked
-    }
-*/
-    def pause() {
-      pauseButton.text = "Continuer..."
-    }
+        pauseButton.text =
+          if (model.state == Paused) "Continuer..."
+          else "Pause..."
+        pauseButton.enabled = locked
 
-    def resume() {
-      pauseButton.text = "Pause..."
-    }
+        resetButton.enabled = locked
 
-    def reset(hard: Boolean) {
-      if (hard || model.simpleMode != simpleMode.selected) {
-        pauseButton.text = "Pause..."
-        controller ! Reset(simpleMode.selected)
+        simpleMode.enabled = locked
+        advancedMode.enabled = locked
       }
-    }
-
-    def lock() {
-      runButton.enabled = false
-      pauseButton.enabled = false
-      resetButton.enabled = false
-    }
-
-    def unlock() {
-      runButton.enabled = true
-      pauseButton.enabled = true
-      resetButton.enabled = true
     }
 
 
@@ -225,9 +192,10 @@ trait GUIs { this: MVC =>
       for ((line, i) <- lines.zipWithIndex) {
         // i is 0-based, line numbers start at 1
         if (errorLines contains (i+1))
-          line.highlight
+          line.highlight // @TODO
+          //line.text = "XX: "+ line.text
       }
-      code.repaint()
+      // code.repaint() // @TODO
     }
   }
 }

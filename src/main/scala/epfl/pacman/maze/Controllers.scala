@@ -19,17 +19,12 @@ trait Controllers { mvc: MVC =>
 
     private def tickCounter = model.counters('tick)
     private def tickCounter_=(v: Int) { model.counters('tick) = v }
-    private def dieCounter = model.counters('die)
-    private def dieCounter_=(v: Int) { model.counters('die) = v }
     private def hunterCounter = model.counters('hunter)
     private def hunterCounter_=(v: Int) { model.counters('hunter) = v }
     private object revivals {
       def apply(m: Monster) = model.counters(m)
       def update(m: Monster, v: Int) = model.counters(m) = v
     }
-
-    private def pause(msg: String) { model = model.copy(paused = true, message = msg) }
-    private def resume() { model = model.copy(paused = false) }
 
     private def makeOffsetPosition(to: Position, dir: Direction, stopped: Boolean) = {
       val s = Settings.blockSize
@@ -55,66 +50,50 @@ trait Controllers { mvc: MVC =>
       new Rectangle(pos.x*s + pos.xo - 1, pos.y*s + pos.yo - 1, s + 2, s + 2)
     }
 
+    /**
+     * Returns
+     *  - new position (old one if he's trying to go into a wall)
+     *  - new direction (old one if goint to a wall)
+     *  - boolean indicating wether he stopped
+     */
     def validateDir(model: Model, f: Figure, optDir: Option[Direction]): (Position, Direction, Boolean) = {
-        // Make sure the direction is possible
-        optDir match {
-            case Some(dir) if !model.isWallAt(f.pos.nextIn(dir)) =>
-                (f.pos.nextIn(dir), dir, false)
-            case _ =>
-                (f.pos, f.dir, true)
-        }
+      // Make sure the direction is possible
+      optDir match {
+        case Some(dir) if !model.isWallAt(f.pos.nextIn(dir)) =>
+          (f.pos.nextIn(dir), dir, false)
+        case _ =>
+          (f.pos, f.dir, true)
+      }
     }
 
     def act() {
       loop {
         react {
           case Tick =>
-            if (!model.paused) {
+            if (model.state == Running) {
 
-              if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.mode == Hunter)) {
-                val majorTick = tickCounter == 0
+              /**
+               * MAJOR TICK TASKS
+               *  - eat points
+               *  - compute new pacman position
+               *  - compute new monster positions
+               *  - revive dead monsters
+               */
 
-                var newMonsters = if (majorTick) {
-                  tickCounter = Settings.blockSize
+              // in hunter mode, we need to compute pacman's position more often
+              if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.hunter)) {
 
-                  // compute next block position if all the small steps have been painted
-                  model.monsters.map(monster => {
-                    val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                    val laserMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos) < 10) && model.pacman.mode == Hunted
-                    Monster(makeOffsetPosition(pos, dir, stopped), dir, stopped, monster.laser.copy(status = laserMode))
-                  })
-                } else {
-                  model.monsters
-                }
-
-                var newDeadMonsters = model.deadMonsters
+                if (hunterCounter > 0)
+                  hunterCounter -= 1
 
                 var newPacman = model.pacman
 
-                if (hunterCounter > 0) {
-                  hunterCounter -= 1
-                }
-
-                if (majorTick) {
-                  for (m <- model.deadMonsters) {
-                    revivals(m) -= 1
-                    if (revivals(m) == 0) {
-                      val pos = model.randomValidPos
-                      newMonsters += m.copy(makeOffsetPosition(pos, Right, false),  Right, false, m.laser.copy(status = false))
-                      newDeadMonsters -= m
-                    }
-                  }
-
-                  if (newPacman.mode == Hunter && hunterCounter == 0) {
-                    newPacman = newPacman.copy(mode = Hunted)
-                  }
-                }
-
                 val p = model.points.find(p => p.pos == model.pacman.pos)
 
+                // eat points before computing new position and making pacman hunted
                 val newPoints = if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
-                        newPacman = newPacman.copy(mode = Hunter)
+                        newPacman = newPacman.copy(hunter = true)
                         hunterCounter = Settings.ticksToHunt
                     }
                     model.points - p.get
@@ -122,36 +101,65 @@ trait Controllers { mvc: MVC =>
                     model.points
                 }
 
+                // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
+                if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {
+                  newPacman = newPacman.copy(hunter = false)
+                }
+
+                // update pacman's position
                 val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
                 newPacman = newPacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped)
 
-                model = model.copy(pacman = newPacman, monsters = newMonsters,
-                                   points = newPoints, deadMonsters = newDeadMonsters)
+                model = model.copy(pacman = newPacman, points = newPoints)
               }
+
+
+              // major tick compute the monster's new position, revive dead monsters
+              if (tickCounter == 0) {
+                // reset the tick counter
+                tickCounter = Settings.blockSize
+
+                // compute next block position if all the small steps have been painted
+                var newMonsters = model.monsters.map(monster => {
+                  val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
+                  val laserMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos) < 10) && !model.pacman.hunter
+                  monster.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped, monster.laser.copy(status = laserMode))
+                })
+
+                var newDeadMonsters = model.deadMonsters
+                for (m <- model.deadMonsters) {
+                  revivals(m) -= 1
+                  if (revivals(m) == 0) {
+                    val pos = model.randomValidPos
+                    newMonsters += m.copy(makeOffsetPosition(pos, Right, false),  Right, false, m.laser.copy(status = false))
+                    newDeadMonsters -= m
+                  }
+                }
+
+                model = model.copy(monsters = newMonsters, deadMonsters = newDeadMonsters)
+              }
+
+
+              /**
+               * MINOR TICK TASKS
+               *  - update pacman's offset
+               *  - update monster's offsets
+               *  - compute collisions
+               */
 
               tickCounter -= 1
 
-              // update the figure's offsets
-              if (model.pacman.mode == Hunter) {
-                if (!model.pacman.stopped) {
+              // update pacman
+              if (!model.pacman.stopped) {
+                model.pacman.incrOffset
+                if (model.pacman.hunter)
                   model.pacman.incrOffset
-                  model.pacman.incrOffset
-                }
-                model.pacman.incrAngle
-              } else {
-                if (!model.pacman.stopped) {
-                  model.pacman.incrOffset
-                }
-                model.pacman.incrAngle
               }
-
+              model.pacman.incrAngle
               view.repaint(figureRect(model.pacman))
 
-              // Repaint borders so that the donut doesn't leave traces
-              val s = Settings.blockSize
-              view.repaint(new Rectangle(0, 0, s, Settings.vBlocks*s))
-              view.repaint(new Rectangle((Settings.hBlocks-1)*s, 0, Settings.hBlocks*s, Settings.vBlocks*s))
 
+              // update monsters
               for (monster <- model.monsters) {
                 if (!monster.stopped) {
                   monster.incrOffset
@@ -160,56 +168,94 @@ trait Controllers { mvc: MVC =>
                 view.repaint(figureRect(monster))
               }
 
+
+              // Repaint borders so that the donut doesn't leave traces
+              val s = Settings.blockSize
+              view.repaint(new Rectangle(0, 0, s, Settings.vBlocks*s))
+              view.repaint(new Rectangle((Settings.hBlocks-1)*s, 0, Settings.hBlocks*s, Settings.vBlocks*s))
+
+
+              // compute collisions
               val omonst = model.monsters.find(m => { m.pos.overlaps(model.pacman.pos) })
               if (!omonst.isEmpty) {
-                if (model.pacman.mode == Hunter) {
+                if (model.pacman.hunter) {
                   // eat the monster
                   model = model.copy(monsters = model.monsters - omonst.get, deadMonsters = model.deadMonsters + omonst.get)
-                  revivals(omonst.get) = nextInt(10)+10
+                  revivals(omonst.get) = Settings.ticksToRevive
                 } else {
-                  val msg =
-                    if (model.simpleMode) {
-                      "Game over..."
-                    } else {
-                      model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
-                      if (model.pacman.lives > 0) {
-                        "Vie perdu!"
-                      } else {
-                        "Game over..."
-                      }
-                    }
-                  pause(msg)
-                  dieCounter = Settings.ticksToDie
+                  // monster eats pacman
+                  if (model.simpleMode) {
+                    model = model.copy(state = GameOver)
+                  } else {
+                    model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
+                    if (model.pacman.lives > 0)
+                      model = model.copy(state = LifeLost(Settings.dieTime))
+                    else
+                      model = model.copy(state = GameOver)
+                  }
                 }
               }
 
-            } else if (dieCounter > 0) {
-              dieCounter -= 1
-              if (dieCounter == 0) {
-                if (!model.simpleMode && model.pacman.lives > 0) {
-                  model = model.resetFigures()
-                  view.repaint() // full repaint to get rid of old figures
-                  resume()
-                }
+             } else {
+              // simulation is not running, update message counters, die conuter, etc
+
+              model.state match {
+                case l @ LifeLost(_) =>
+                  l.delay -= 1
+                  if (l.delay == 0) {
+                    if (!model.simpleMode && model.pacman.lives > 0) {
+                      model = model.resetFigures().copy(state = Running)
+                      view.repaint()
+                    }
+                  }
+
+                case _ => ()
               }
             }
 
-          case Pause(msg) =>
-            pause(msg)
-            view.repaint()
 
-          case Resume =>
-            resume()
-            view.repaint()
+          case Pause =>
+            if (model.state == Running) {
+              model = model.copy(state = Paused)
+              gui.update()
+            } else if (model.state == Paused) {
+              model = model.copy(state = Running)
+              gui.update()
+            }
+
+          case Compile(code) =>
+            val next = model.state match {
+              case CompileError(n) => n
+              case s => s
+            }
+            model = model.copy(state = Loading(next))
+            gui.update()
+            compiler.compile(code)
+
+
+          case FoundErrors(lines) =>
+            gui.setErrors(lines)
+            model.state match {
+              case Loading(next) =>
+                model = model.copy(state = CompileError(next))
+            }
+            gui.update()
 
           case Load(newPacmanBehavior) =>
             pacmanBehavior = newPacmanBehavior
-            gui.unlock()
-            gui.resume()
-            resume()
+            model.state match {
+              case Loading(next) =>
+                model = model.copy(state = next)
+            }
+            gui.update()
 
           case Reset(simpleMode) =>
-            model = new Model(simpleMode = simpleMode)
+            model.state match {
+              case Loading(_) | CompileError(_) => ()
+              case _ =>
+                model = new Model(simpleMode = simpleMode)
+                gui.update()
+            }
         }
       }
     }
@@ -226,9 +272,9 @@ trait Controllers { mvc: MVC =>
 
 
   case object Tick
-  case class Pause(msg: String = "Jeu en pause...")
-  case object Resume
+  case object Pause
   case class Reset(simpleMode: Boolean)
   case class Compile(code: String)
+  case class FoundErrors(lines: collection.Set[Int])
   case class Load(pacmanBehavior: Behavior { val mvc: Controllers.this.type })
 }

@@ -27,10 +27,6 @@ trait Thingies { this: Models =>
    * PacMan
    */
 
-  sealed abstract class Mode
-  case object Hunted extends Mode
-  case object Hunter extends Mode
-
   case class Angle(var counter: Int) {
     def value = if (counter > 30) 60-counter else counter
   }
@@ -38,7 +34,7 @@ trait Thingies { this: Models =>
   case class PacMan(pos: OffsetPosition,
                     dir: Direction,
                     stopped: Boolean = true,
-                    mode: Mode = Hunted,
+                    hunter: Boolean = false,
                     angle: Angle = Angle(0),
                     lives: Int = Settings.nbLives) extends Figure {
     def incrAngle {

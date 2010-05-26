@@ -38,7 +38,7 @@ object Factory {
 }"""
 
   // number of lines before user's text
-  private val errorOffset = 13
+  private val errorOffset = 14
 
   private val settings = new Settings()
 
@@ -105,9 +105,7 @@ object Factory {
           val text = errorLines.mkString("erroneous line(s): ", ", ", "")
           println(text)
           swing.Swing.onEDT {
-            mvc.controller ! mvc.Resume
-            mvc.gui.setErrors(errorLines)
-            mvc.gui.unlock()
+            mvc.controller ! mvc.FoundErrors(errorLines)
           }
         } else {
           val parent = this.getClass.getClassLoader

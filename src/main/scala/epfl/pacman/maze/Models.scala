@@ -4,16 +4,24 @@ package maze
 import collection.{mutable => mut, immutable => imm}
 
 trait Models extends Thingies with Positions with Directions { this: MVC =>
-  
+
+  abstract class State
+  case object Running extends State
+  case object Paused extends State
+  case class Loading(next: State) extends State
+  case object GameOver extends State
+  case object GameWon extends State
+  case class LifeLost(var delay: Int) extends State
+  case class CompileError(next: State) extends State
+
   case class Model(pacman: PacMan = ModelDefaults.pacman,
                    monsters: Set[Monster] = ModelDefaults.monsters,
                    walls: Set[Wall] = ModelDefaults.maze,
                    points: Set[Thingy] = ModelDefaults.points,
-                   paused: Boolean = false,
                    simpleMode: Boolean = true,
                    deadMonsters: Set[Monster] = Set(),
                    counters: Counters = new Counters(),
-                   message: String = "Jeu en pause...") {
+                   state: State = Running) {
 
     def resetFigures() = {
       counters.clear()

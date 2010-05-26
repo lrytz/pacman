@@ -50,11 +50,18 @@ trait Views { this: MVC =>
       drawPacman(model.pacman, g)
 
 
-      if (model.paused) {
+      if (model.state != Running) {
         g.setColor(new Color(0x44ffffff, true))
         g.fillRect(0, 0, width, height)
 
-        val msg = model.message
+        val msg = model.state match {
+          case Paused => "Jeu en pause..."
+          case Loading(_) => "Code en charge..."
+          case GameOver => "Game over..."
+          case GameWon => "Jeu gagné, PacMan sauvé!"
+          case LifeLost(_) => "Vie perdu!"
+          case CompileError(_) => "Code incorrect!"
+        }
 
         val font = new Font("Dialog", Font.BOLD, 24)
         g.setFont(font)
@@ -75,7 +82,7 @@ trait Views { this: MVC =>
     @inline final def toAbs(x: Int, o: Int = 0) = x * blockSize + o
 
     def drawPacman(p: PacMan, g: Graphics2D) = {
-      if (p.mode == Hunted) {
+      if (!p.hunter) {
         g.setColor(Color.YELLOW)
       } else {
         if (((p.angle.value / 4) & 1) == 0) {

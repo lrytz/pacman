@@ -7,8 +7,7 @@ import maze.MVC
 
 object Behavior {
   def defaultBehavior =
-"""
-siChasseur {
+"""siChasseur {
   bouger telQue versLesMonstres
 } sinon {
   siMonstresLoin {
@@ -42,8 +41,8 @@ abstract class Behavior {
 
     def auHasard = alterner(50)
 
-    def siChasseur = si(model.pacman.mode == Hunter) _
-    def siChassé   = si(model.pacman.mode == Hunted) _
+    def siChasseur = si(model.pacman.hunter) _
+    def siChassé   = si(!model.pacman.hunter) _
 
     def siMonstresPrès = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) <  6) _
     def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) >= 6) _
@@ -90,7 +89,7 @@ abstract class Behavior {
     }
 
     def loinDesMonstres(ds: Directions): Directions = {
-      maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, model.pacman.dir, 1.5)
+      maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, model.pacman.dir, 5)
     }
 
     def versLesMonstres(ds: Directions): Directions = {
@@ -148,7 +147,7 @@ abstract class Behavior {
     }
 
     def maxWeightedDistToVia(to: Set[Position], ds: Directions, dir: Direction, weight: Double) = {
-      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (d._1 == dir) (d._2*weight).toInt else d._2)).sortWith((a, b) => a._2 > b._2))
+      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (d._1 == dir) (d._2+weight).toInt else d._2)).sortWith((a, b) => a._2 > b._2))
     }
 
     def maxPathToVia(to: Set[Position], ds: Directions) = {
