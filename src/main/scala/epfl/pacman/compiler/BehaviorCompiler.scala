@@ -29,6 +29,7 @@ object Factory {
     def getMethod(model: Model, p: Figure) = {
       new NextMethod(model, p) {
         def apply = {
+          None
           %s
         }
       }
