@@ -66,7 +66,7 @@ trait Views { this: MVC =>
           case GameOver => "Game over..."
           case GameWon if model.simpleMode => "Jeu gagné, PacMan sauvé!"
           case GameWon => "Jeu gangné!"
-          case LifeLost(_) => "Vie perdu!"
+          case LifeLost(_) => "Vie perdue!"
           case CompileError(_) => "Code incorrect!"
         }
 
