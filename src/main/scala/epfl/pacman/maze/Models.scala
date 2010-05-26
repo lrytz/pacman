@@ -89,6 +89,10 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       r
     }
 
+    def maxSafePathBetween(init: Position, dir: Direction, to: Set[Position], max: Int): Int = {
+      g.maxSafePath(init, dir, to, max)
+    }
+
     private class Graph {
       case class Node(pos: Position, var color: Int = 0)
       var nodes     = imm.Map[Position, Node]()
@@ -130,6 +134,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         while (!toVisit.isEmpty && dist < max) {
           dist += 1
           val toVisitBatch = toVisit
+          toVisit = Set[Node]()
           for (n <- toVisitBatch) {
             if (n.color == 0) {
               edgesFrom(n).foreach(toVisit += _)
@@ -143,6 +148,51 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         dist min max
       }
 
+      def maxSafePath(init: Position, dir: Direction, opponents: Set[Position], max: Int): Int = {
+        println("From "+init+" going "+ dir)
+
+        val pos = init.nextIn(dir)
+        mark(init)
+
+        var toVisitFrom: Set[Node] = Set(nodes(pos))
+        var toVisitOpp: Set[Node] = opponents.map(o => nodes(o)).toSet
+
+        var dist = 0
+
+        while (!toVisitFrom.isEmpty && dist < max) {
+          println("ToVisit: "+toVisitFrom)
+
+          dist += 1
+
+          // Let's move monsters
+          val toVisitOppBatch = toVisitOpp
+          toVisitOpp = Set[Node]()
+          for (n <- toVisitOppBatch) {
+            // visited by nobody
+            edgesFrom(n).foreach(toVisitOpp += _)
+            n.color = dist;
+          }
+
+          // Let's move pacman
+          val toVisitFromBatch = toVisitFrom
+          toVisitFrom = Set[Node]()
+          for (n <- toVisitFromBatch) {
+            if (n.color == 0) {
+              // visited by nobody
+              edgesFrom(n).foreach(toVisitFrom += _)
+              n.color = dist;
+            } else {
+              // already visited by pacman or a monster, ignore
+            }
+          }
+
+        }
+
+        clear
+
+        dist min max
+      }
+
       def maxPathFrom(p: Position, max: Int): Int = {
         var toVisit: Set[Node] = Set(nodes(p))
         var dist = 0
@@ -150,6 +200,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         while (!toVisit.isEmpty && dist < max) {
           dist += 1
           val toVisitBatch = toVisit
+          toVisit = Set[Node]()
           for (n <- toVisitBatch) {
             if (n.color == 0) {
               edgesFrom(n).foreach(toVisit += _)
@@ -163,7 +214,6 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         dist min max
       }
     }
-
   }
 
   class Counters extends mut.HashMap[Any, Int] {

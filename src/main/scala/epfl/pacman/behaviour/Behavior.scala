@@ -120,6 +120,20 @@ abstract class Behavior {
       maxDistToVia(Set[Position](model.pacman.pos), ds)
     }
 
+    def pasMourir(n: Int)(ds: Directions): Directions = {
+      println("##################");
+      val dirDists = ds.dirs.map(d => (d, model.maxSafePathBetween(model.pacman.pos, d, Set[Position]() ++ model.monsters.map(_.pos), n+1)))
+      println(dirDists);
+      val okDists = dirDists.filter(d => d._2 > n).toSeq
+
+      if (okDists.size > 0) {
+        // Return only the direction with top safe path
+        Directions(Set[Direction]() + okDists.sortWith((a,b) => a._2 > b._2).head._1)
+      } else {
+        NoDirections
+      }
+    }
+
     val Droite = new Directions(Set(Right))
     val Gauche = new Directions(Set(Left))
     val Bas    = new Directions(Set(Down))
