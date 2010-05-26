@@ -121,9 +121,7 @@ abstract class Behavior {
     }
 
     def pasMourir(n: Int)(ds: Directions): Directions = {
-      println("##################");
       val dirDists = ds.dirs.map(d => (d, model.maxSafePathBetween(model.pacman.pos, d, Set[Position]() ++ model.monsters.map(_.pos), n+1)))
-      println(dirDists);
       val okDists = dirDists.filter(d => d._2 > n).toSeq
 
       if (okDists.size > 0) {

@@ -149,7 +149,6 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       }
 
       def maxSafePath(init: Position, dir: Direction, opponents: Set[Position], max: Int): Int = {
-        println("From "+init+" going "+ dir)
 
         val pos = init.nextIn(dir)
         mark(init)
@@ -160,10 +159,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         var dist = 0
 
         while (!toVisitFrom.isEmpty && dist < max) {
-          println("ToVisit: "+toVisitFrom)
-
           dist += 1
-
           // Let's move monsters
           val toVisitOppBatch = toVisitOpp
           toVisitOpp = Set[Node]()
@@ -227,10 +223,10 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
     val pacman = new PacMan(new OffsetPosition(14, 10), Right)
 
     val monsters: Set[Monster] = {
-      Set() + Monster(new OffsetPosition(1,1), Right) +
-              Monster(new OffsetPosition(28,1), Left) +
-              Monster(new OffsetPosition(28,18), Left) +
-              Monster(new OffsetPosition(1,18), Right)
+      Set() + Monster(new OffsetPosition(1,1), Right,  Info) +
+              Monster(new OffsetPosition(28,1), Left,  Info) +
+              Monster(new OffsetPosition(28,18), Left, Cerbero) +
+              Monster(new OffsetPosition(1,18), Right, Cerbero)
     }
 
     val maze: Set[Wall] = {

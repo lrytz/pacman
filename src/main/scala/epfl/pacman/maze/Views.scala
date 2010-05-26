@@ -129,24 +129,35 @@ trait Views { this: MVC =>
 
           g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, 0, 360)
         case _: SuperPoint =>
-          val xOffset = 3
+          val xOffset = 7
           val yOffset = 6
 
           g.drawImage(cherryImg, toAbs(p.pos.x, 0) + xOffset, toAbs(p.pos.y, 0) + yOffset, null)
       }
     }
 
-    val images = ("src/main/resources/badguy0.png" ::
-                  "src/main/resources/badguy1.png" ::
-                  "src/main/resources/badguy2.png" ::
-                  "src/main/resources/badguy3.png" :: Nil).map(path => ImageIO.read(new File(path)))
+    val imagesInfo = ("src/main/resources/badguy1-0.png" ::
+                      "src/main/resources/badguy1-1.png" ::
+                      "src/main/resources/badguy1-2.png" ::
+                      "src/main/resources/badguy1-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
 
+    val imagesCerbero = ("src/main/resources/badguy2-0.png" ::
+                         "src/main/resources/badguy2-1.png" ::
+                         "src/main/resources/badguy2-2.png" ::
+                         "src/main/resources/badguy2-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
 
     def drawMonster(m: Monster, g: Graphics2D) = {
       val xOffset = 3
       val yOffset = 6
 
-      val img = if (m.laser.status) { images((m.laser.animOffset/2 % 3) + 1) } else { images(0) }
+      val images = m.typ match {
+        case Info =>
+          imagesInfo
+        case Cerbero =>
+          imagesCerbero
+      }
+
+      val img = if (m.anim.status) { images((m.anim.animOffset/2 % (images.size-1)) + 1) } else { images(0) }
 
       g.drawImage(img, toAbs(m.pos.x, m.pos.xo) + xOffset, toAbs(m.pos.y, m.pos.yo) + yOffset, null)
     }

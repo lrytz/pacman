@@ -47,23 +47,28 @@ trait Thingies { this: Models =>
    * Monsters
    */
 
-  case class LaserSettings(var status: Boolean, var animOffset: Int)
+  sealed abstract class MonsterTyp
+  object Cerbero extends MonsterTyp
+  object Info extends MonsterTyp
+
+  case class AnimationSettings(var status: Boolean, var animOffset: Int)
 
   case class Monster(pos: OffsetPosition,
                      dir: Direction,
+                     typ: MonsterTyp,
                      stopped: Boolean = false,
-                     laser: LaserSettings = LaserSettings(true, 0),
+                     anim: AnimationSettings = AnimationSettings(true, 0),
                      id: Int = freshId) extends Figure {
     def incrAnimOffset {
-      laser.animOffset = (laser.animOffset + 1) % 6
+      anim.animOffset = (anim.animOffset + 1) % 6
     }
 
-    def activateLaser {
-      laser.status = true
+    def activateAnim {
+      anim.status = true
     }
 
-    def deactivateLaser {
-      laser.status = false
+    def deactivateAnim {
+      anim.status = false
     }
   }
 

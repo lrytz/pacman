@@ -131,8 +131,11 @@ trait Controllers { mvc: MVC =>
                 // compute next block position if all the small steps have been painted
                 var newMonsters = model.monsters.map(monster => {
                   val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
-                  val laserMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos) < 10) && !model.pacman.hunter
-                  monster.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped, monster.laser.copy(status = laserMode))
+                  val animMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos) < 10) && !model.pacman.hunter
+                  monster.copy(pos = makeOffsetPosition(pos, dir, stopped),
+                               dir = dir,
+                               stopped = stopped,
+                               anim = monster.anim.copy(status = animMode))
                 })
 
                 var newDeadMonsters = model.deadMonsters
@@ -140,7 +143,10 @@ trait Controllers { mvc: MVC =>
                   revivals(m) -= 1
                   if (revivals(m) == 0) {
                     val pos = model.randomValidPos
-                    newMonsters += m.copy(makeOffsetPosition(pos, Right, false),  Right, false, m.laser.copy(status = false))
+                    newMonsters += m.copy(pos = makeOffsetPosition(pos, Right, false),
+                                          dir = Right,
+                                          stopped = false,
+                                          anim = m.anim.copy(status = false))
                     newDeadMonsters -= m
                   }
                 }
