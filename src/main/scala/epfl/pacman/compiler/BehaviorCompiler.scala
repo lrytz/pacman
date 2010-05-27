@@ -47,7 +47,8 @@ object Factory {
       val l = cls.getProtectionDomain.getCodeSource.getLocation
       new java.io.File(l.toURI).getAbsolutePath
     }
-    pathOf(this.getClass) +":"+ pathOf(classOf[ScalaObject]) +":"+ pathOf(classOf[Global])
+    import java.io.File.{pathSeparator => %}
+    pathOf(this.getClass) + % + pathOf(classOf[ScalaObject]) + % + pathOf(classOf[Global])
   }
 
   private val outDir = new VirtualDirectory("(memory)", None)

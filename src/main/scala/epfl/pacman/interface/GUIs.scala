@@ -28,9 +28,11 @@ trait GUIs { this: MVC =>
     val runButton = new Button("Compiler nouveu Code!")
 
     val simpleMode = new RadioButton("Mode simple")
+    simpleMode.background = Color.BLACK // for windows
     simpleMode.foreground = Color.WHITE
     simpleMode.selected = true
     val advancedMode = new RadioButton("Mode avancé")
+    advancedMode.background = Color.BLACK // for windows
     advancedMode.foreground = Color.WHITE
     val modeGroup = new ButtonGroup(simpleMode, advancedMode)
 
@@ -74,9 +76,11 @@ trait GUIs { this: MVC =>
 
       contents = new GridBagPanel {
         import GridBagPanel._
+        background = Color.BLACK // for windows
         val c = new Constraints
 
         val left = new GridBagPanel {
+          background = Color.BLACK // for windows
           val c = new Constraints
 
           c.fill = Fill.Horizontal
@@ -118,6 +122,7 @@ trait GUIs { this: MVC =>
         layout(view) = c
 
         val right = new GridBagPanel {
+          background = Color.BLACK // for windows
           val c = new Constraints
 
           c.fill = Fill.Horizontal

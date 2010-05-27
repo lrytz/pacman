@@ -114,8 +114,16 @@ trait Views { this: MVC =>
 
       g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, startAngle, 360 - 2*angle)
     }
-    
-    val cherryImg = ImageIO.read(new File("src/main/resources/cherry.png"))
+
+    private def imageURL(name: String) = {
+      val resourceURL = this.getClass.getResource("/"+ name)
+      if (resourceURL != null)
+        resourceURL
+      else
+        new File("src/main/resources/"+ name).toURI.toURL
+    }
+
+    val cherryImg = ImageIO.read(imageURL("cherry.png"))
 
     def drawPoint(p: Thingy, g: Graphics2D) = {
       g.setColor(Color.GRAY)
@@ -136,15 +144,15 @@ trait Views { this: MVC =>
       }
     }
 
-    val imagesInfo = ("src/main/resources/badguy1-0.png" ::
-                      "src/main/resources/badguy1-1.png" ::
-                      "src/main/resources/badguy1-2.png" ::
-                      "src/main/resources/badguy1-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
+    val imagesInfo = (imageURL("badguy1-0.png") ::
+                      imageURL("badguy1-1.png") ::
+                      imageURL("badguy1-2.png") ::
+                      imageURL("badguy1-3.png") :: Nil).map(ImageIO.read)
 
-    val imagesCerebro = ("src/main/resources/badguy2-0.png" ::
-                         "src/main/resources/badguy2-1.png" ::
-                         "src/main/resources/badguy2-2.png" ::
-                         "src/main/resources/badguy2-3.png" :: Nil).map(path => ImageIO.read(new File(path)))
+    val imagesCerebro = (imageURL("badguy2-0.png") ::
+                         imageURL("badguy2-1.png") ::
+                         imageURL("badguy2-2.png") ::
+                         imageURL("badguy2-3.png") :: Nil).map(ImageIO.read)
 
     def drawMonster(m: Monster, g: Graphics2D) = {
 
