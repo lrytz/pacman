@@ -92,6 +92,20 @@ abstract class Behavior {
       maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, directionsEnAvant, 5)
     }
 
+    def coinHautGauche = versPos(BlockPosition(1,1)) _
+    def coinHautDroite = versPos(BlockPosition(28,1)) _
+    def coinBasDroite = versPos(BlockPosition(28,18)) _
+    def coinBasGauche = versPos(BlockPosition(1,18)) _
+
+    def versPos(p: Position)(ds: Directions): Directions = {
+        if (p == model.pacman.pos) {
+          NoDirections
+        } else {
+          minDistToVia(Set[Position]() + p, ds)
+        }
+    }
+
+
     def versLesMonstres(ds: Directions): Directions = {
       minDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds)
     }
@@ -220,6 +234,8 @@ abstract class Behavior {
      }
 
      def telQue = tellesQue _
+
+     def vers = tellesQue _
 
      def telque(cond: Filter) = {
         cond(this)
