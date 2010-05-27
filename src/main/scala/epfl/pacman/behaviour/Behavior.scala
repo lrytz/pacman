@@ -211,7 +211,15 @@ abstract class Behavior {
 
   def getMethod(model: Model, c: Figure): () => Option[Direction]
 
-  def next(model: Model, c: Figure) = getMethod(model, c)()
+  def next(model: Model, c: Figure) = {
+    try {
+      getMethod(model, c)()
+    } catch {
+      case e =>
+        println("Exception in next(): "+e)
+        None
+    }
+  }
 
 
 
