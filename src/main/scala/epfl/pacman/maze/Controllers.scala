@@ -237,7 +237,7 @@ trait Controllers { mvc: MVC =>
               }
 
 
-             } else {
+            } else {
               // simulation is not running, update game countdown, die conuter
 
               model.state match {
