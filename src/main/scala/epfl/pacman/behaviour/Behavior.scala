@@ -7,7 +7,8 @@ import maze.MVC
 
 object Behavior {
   def defaultBehavior =
-"""siChasseur {
+"""
+siChasseur {
   bouge telQue versUnMonstre
 } sinon {
   siMonstresLoin {
@@ -177,7 +178,7 @@ abstract class Behavior {
     }
 
     def maxWeightedDistToVia(to: Set[Position], ds: Directions, weightedDirs: Directions, weight: Int) = {
-      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (weightedDirs.dirs contains d._1) d._2+weight else d._2)).sortWith((a, b) => a._2 > b._2))
+      randomBestDir(withDistBetween(ds.dirs, to).map(d => (d._1, if (((2*d._2) > weight) && (weightedDirs.dirs contains d._1)) d._2+weight else d._2)).sortWith((a, b) => a._2 > b._2))
     }
 
     def maxPathToVia(to: Set[Position], ds: Directions) = {

@@ -157,7 +157,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         mark(init)
 
         var toVisitFrom: Set[Node] = Set(nodes(pos))
-        var toVisitOpp: Set[Node] = opponents.map(o => nodes(o)).toSet
+        var toVisitOpp: Set[Node] = opponents.flatMap(o => edgesFrom(nodes(o)) + nodes(o)).toSet
 
         var dist = 0
 
@@ -167,7 +167,6 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
           val toVisitOppBatch = toVisitOpp
           toVisitOpp = Set[Node]()
           for (n <- toVisitOppBatch) {
-            // visited by nobody
             edgesFrom(n).foreach(toVisitOpp += _)
             n.color = dist;
           }
