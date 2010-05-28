@@ -41,10 +41,14 @@ object Settings {
   val superPointsRatio = 4
 
   // keywords to highlight in the code editor
-  val keywords = List("siChasseur", "siChassé", "siMonstresLoin", "siMonstresPrès",
-                      "Droite", "Gauche", "Haut", "Bas",
-                      "directionVersLesMonstres", "directionLoinDesMonstres",
-                      "sinon")
+  val keywords = List("bouge", "reste", "vers", "telQue",
+                      "si", "siChasseur", "siChassé", "siMonstresLoin", "siMonstresPrès",
+                      "alterner", "auHasard", "sinon",
+                      "àDroite", "àGauche", "enHaut", "enBas", "enAvant",
+                      "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
+                      "loinDesMonstres", "versUnMonstre", "loinDesPoints", "versUnPoint",
+                      "loinDesCerises", "versUneCerise", "loinDePacMan", "versPacMan",
+                      "enSécuritéPendant")
 
     /** Convert seconds to ticks */
     private def ticks(s: Int) = s * 1000 / sleepTime

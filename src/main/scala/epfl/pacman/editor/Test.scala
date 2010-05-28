@@ -11,6 +11,7 @@ object Test extends SimpleSwingApplication {
       import GridBagPanel._
       val pane = new ScalaPane {
         preferredSize = new Dimension(300, 300)
+        keywords ++= List("je", "tu", "le", "la")
       }
       layout(pane) = new Constraints {
         gridx = 0
@@ -26,7 +27,9 @@ object Test extends SimpleSwingApplication {
       listenTo(button)
       reactions += {
         case ButtonClicked(`button`) =>
-          println("Click me baby, one more time")
+          val line = pane.lines.length / 2
+          println("highlighting line " + line)
+          pane.lines(line).highlight
       }
     }
   }

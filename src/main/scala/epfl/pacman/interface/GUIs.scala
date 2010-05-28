@@ -20,7 +20,6 @@ trait GUIs { this: MVC =>
     val code = new ScalaPane()
     code.background = Color.BLACK
     code.peer.setCaretColor(Color.WHITE)
-    code.text = Behavior.defaultBehavior
     code.keywords ++= Settings.keywords
     code.preferredSize = (Settings.codeTextWidth, 0)
     //code.notifyUpdate() // should highlight existing text, doesnt' work..
@@ -208,6 +207,7 @@ trait GUIs { this: MVC =>
 
       update()
       maximize()
+      code.text = Behavior.defaultBehavior
     }
 
     def update() {

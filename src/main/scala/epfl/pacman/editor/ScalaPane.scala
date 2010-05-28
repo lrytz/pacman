@@ -65,24 +65,20 @@ class ScalaPane extends Component { thisPane =>
     }
 
     def highlight: Unit = checkGen {
-      document.setParagraphAttributes(pos0, 0, style.highlight, true)
+      revealKeywords(style.highlight, style.highkey)
     }
 
     def removeHighlight: Unit = checkGen {
-      document.setParagraphAttributes(pos0, 0, style.normal, true)
+      revealKeywords(style.normal, style.keyword)
     }
 
-    def revealKeywords: Unit = checkGen {
+    def revealKeywords(textStyle: AttributeSet, keywordStyle: AttributeSet): Unit = checkGen {
       val separators = new Regex(""" |\.|\(|\)|,""") // must be single characters
       val text = separators.replaceAllIn(text0, " ")
-      def highlight0(startChar: Int, word: String): Unit = {
+      def highlight0(startChar: Int, word: String): Unit =
         if (keywords exists { k => (k compareTo word) == 0 }) {
-          document.setCharacterAttributes(pos0 + startChar, word.length, style.keyword, true)
-          document.setCharacterAttributes(pos0 + word.length, 0, style.normal, true)
+          document.setCharacterAttributes(pos0 + startChar, word.length, keywordStyle, true)
         }
-        else
-          document.setCharacterAttributes(pos0 + startChar, pos0 + word.length, style.normal, true)
-      }
       def reveal0(startChar: Int): Unit = {
         val endChar = text.indexOf(' ', startChar)
         if (endChar < 0)
@@ -92,6 +88,7 @@ class ScalaPane extends Component { thisPane =>
           reveal0(endChar + 1)
         }
       }
+      document.setCharacterAttributes(pos0, text0.length, textStyle, true)
       reveal0(startChar = 0)
     }
 
@@ -105,7 +102,7 @@ class ScalaPane extends Component { thisPane =>
 
   protected def notifyUpdate(editFrom: Int, editTo: Int): Unit = {
     thisPane.generation += 1
-    if (peer.isValid) { // component deadlocks if document edited during initialisation
+    if (peer.isShowing) { // component deadlocks if document edited during initialisation
       val touchedLines =
         lines filter { l =>
           val (lineFrom, lineTo) = l.range
@@ -113,12 +110,12 @@ class ScalaPane extends Component { thisPane =>
         }
       //println("touchedLines = " + (touchedLines map { _.text }).mkString("\"", "\", \"", "\""))
       touchedLines foreach { _.removeHighlight }
-      touchedLines foreach { _.revealKeywords }
     }
   }
 
   protected lazy val document = new DefaultStyledDocument {
     setParagraphAttributes(0, getLength, style.normal, true)
+    setCharacterAttributes(0, getLength, style.normal, true)
     addDocumentListener(new DocumentListener {
       def changedUpdate(e: DocumentEvent) = {}
       def insertUpdate(e: DocumentEvent) = { onEDT(notifyUpdate(e.getOffset, e.getOffset + e.getLength)) }
