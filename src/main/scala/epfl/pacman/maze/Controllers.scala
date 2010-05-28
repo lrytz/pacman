@@ -233,8 +233,7 @@ trait Controllers { mvc: MVC =>
                   gui.update()
                 }
               } else {
-                gui.scoreTitle.text = "Score: "+model.counters('score);
-                gui.scoreTitle.repaint()
+                gui.update()
               }
 
 

@@ -214,7 +214,6 @@ trait GUIs { this: MVC =>
       onEDT {
         view.repaint()
         statusDisplay.repaint()
-        scoreTitle.repaint()
 
         val locked = model.state match {
           case Loading(_) => false
@@ -233,10 +232,15 @@ trait GUIs { this: MVC =>
         if (model.simpleMode) {
           simpleMode.selected = true
           statusTitle.text = "Temps pour sauvetage"
+          scoreTitle.text = ""
         } else{
           advancedMode.selected = true
           statusTitle.text = "Vies restantes"
+          scoreTitle.text  = "Score: "+model.counters('score);
         }
+
+        scoreTitle.repaint()
+
         simpleMode.enabled = locked
         advancedMode.enabled = locked
       }
