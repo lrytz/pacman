@@ -30,7 +30,7 @@ object Factory {
       new NextMethod(model, p) {
         def apply = {
           None
-          %s
+%s
         }
       }
     }
@@ -92,17 +92,36 @@ object Factory {
 
   private val global = new Global(settings, reporter)
 
+  private def columnToLine(column: Int, lengths: List[Int]) = {
+    println("column: "+ column)
+    val r: (Int, Int) = ((0, 1) /: lengths)((sumLine, lineLength) => {
+      val sum = sumLine._1 + lineLength
+      if (column > sum)
+        (sum, sumLine._2 + 1)
+      else
+        (sum, sumLine._2)
+    })
+    r._2
+  }
+
   def compile(body: String) {
     val t = new Thread() {
       override def run() {
 
-        val source = template.format(body)
+        val (line, lengths) = (body.split("\n") :\ (("", List[Int]())))((line, acc) => (line + " " + acc._1, (line.length+1) :: acc._2))
+
+for ((line, length) <- body.split("\n").zip(lengths)) {
+  assert(line.length == length - 1)
+  println(line + ", "+ length)
+}
+
+        val source = template.format(line)
         val run = new global.Run
         val file = new BatchSourceFile("<behavior>", source)
         run.compileSources(List(file))
 
         if (reporter.hasErrors) {
-          val errorLines = reporter.errorPositions.map(_.line - errorOffset)
+          val errorLines = reporter.errorPositions.map(pos => columnToLine(pos.column, lengths)) // (_.line - errorOffset)
           val text = errorLines.mkString("erroneous line(s): ", ", ", "")
           println(text)
           swing.Swing.onEDT {

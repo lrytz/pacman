@@ -284,11 +284,17 @@ trait Controllers { mvc: MVC =>
 
           case Load(newPacmanBehavior) =>
             pacmanBehavior = newPacmanBehavior
-            model.state match {
-              case Loading(next) =>
-                model = model.copy(state = next)
+            val Loading(next) = model.state
+            model = model.copy(state = next)
+            next match {
+              case GameOver | GameWon =>
+                controller ! Reset(model.simpleMode)
+              case Paused =>
+                controller ! Pause
+              case _ =>
+                gui.update()
+
             }
-            gui.update()
 
           case Reset(simpleMode) =>
             model.state match {

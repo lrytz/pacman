@@ -9,6 +9,11 @@ import editor.ScalaPane
 import behaviour.Behavior
 import java.awt.{Font, Color, Insets}
 
+/**
+ * @TODO actually, not the whole GUI needs to be part of the MVC, only the components that
+ * need to be updated / notified by the controller should be part of the view. the layout,
+ * the text area etc could be kept outside the MVC.
+ */
 trait GUIs { this: MVC =>
 
   class PacmanScreen extends GridBagPanel {
@@ -241,10 +246,8 @@ trait GUIs { this: MVC =>
       for ((line, i) <- lines.zipWithIndex) {
         // i is 0-based, line numbers start at 1
         if (errorLines contains (i+1))
-          line.highlight // @TODO
-          //line.text = "XX: "+ line.text
+          line.highlight
       }
-      // code.repaint() // @TODO
     }
 
     update()

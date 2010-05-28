@@ -5,6 +5,7 @@ import scala.util.Random.{nextInt => randomInt}
 
 import maze.MVC
 
+/*
 object Behavior {
   def defaultBehavior =
 """
@@ -19,6 +20,7 @@ siChasseur {
 }
 """
 }
+*/
 
 abstract class Behavior {
   val mvc: MVC
@@ -274,7 +276,7 @@ abstract class DefaultPacManBehavior extends Behavior {
   import mvc._
   def getMethod(model: Model, p: Figure) = {
     new NextMethod(model, p) {
-      def apply = {
+      def apply = reste /*{
         siChasseur {
           bouge telQue versUnMonstre
         } sinon {
@@ -285,7 +287,7 @@ abstract class DefaultPacManBehavior extends Behavior {
           }
         }
       }
-    }
+*/    }
   }
 }
 
