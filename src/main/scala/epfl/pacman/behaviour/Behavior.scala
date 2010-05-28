@@ -96,14 +96,14 @@ abstract class Behavior {
         if (p == model.pacman.pos) {
           NoDirections
         } else {
-          minDistToVia(Set[Position]() + p, ds)
+          minDistToVia(Set(p), ds)
         }
     }
 
-    def coinHautGauche = versPos(BlockPosition(1,1)) _
-    def coinHautDroite = versPos(BlockPosition(28,1)) _
-    def coinBasDroite = versPos(BlockPosition(28,18)) _
-    def coinBasGauche = versPos(BlockPosition(1,18)) _
+    def coinHautGauche = versPos(BlockPosition(1, 1)) _
+    def coinHautDroite = versPos(BlockPosition(Settings.hBlocks-2, 1)) _
+    def coinBasDroite  = versPos(BlockPosition(Settings.hBlocks-2, Settings.vBlocks-2)) _
+    def coinBasGauche  = versPos(BlockPosition(1, Settings.vBlocks-2)) _
 
     def versUnMonstre(ds: Directions): Directions =
       minDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds)
