@@ -29,20 +29,20 @@ trait GUIs { this: MVC =>
     code.preferredSize = (Settings.codeTextWidth, 0)
     //code.notifyUpdate() // should highlight existing text, doesnt' work..
 
-    val runButton = new Button("Compiler nouveu Code!")
+    val runButton = new Button("Charger les ordres")
 
-    val simpleMode = new RadioButton("Mode simple")
+    val simpleMode = new RadioButton("Mode simple (badge)")
     simpleMode.background = Color.BLACK // for windows
     simpleMode.foreground = Color.WHITE
     simpleMode.selected = true
-    val advancedMode = new RadioButton("Mode avancé")
+    val advancedMode = new RadioButton("Mode avancé (avec points et cerises)")
     advancedMode.background = Color.BLACK // for windows
     advancedMode.foreground = Color.WHITE
     val modeGroup = new ButtonGroup(simpleMode, advancedMode)
 
     val pauseButton = new Button("")
 
-    val resetButton = new Button("Redémarrer...")
+    val resetButton = new Button("Recommencer..")
 
     val statusTitle = new Label("")
     statusTitle.foreground = Color.WHITE
@@ -89,7 +89,7 @@ trait GUIs { this: MVC =>
       c.gridx = 0
       c.gridy = 0
       c.insets = new Insets(10, 10, 15, 10)
-      val codeLabel = new Label("Code de PacMan")
+      val codeLabel = new Label("Les ordres pour sauver PacMan:")
       codeLabel.xAlignment = Alignment.Left
       codeLabel.foreground = Color.WHITE
       codeLabel.font = new Font(codeLabel.font.getName, Font.BOLD, 18)
@@ -128,14 +128,6 @@ trait GUIs { this: MVC =>
       val c = new Constraints
 
       c.fill = Fill.Horizontal
-      c.gridx = 0
-      c.gridy = 0
-      c.insets = new Insets(10, 10, 15, 10) // top, left, bottom, right
-      val configLabel = new Label("Configuration")
-      configLabel.xAlignment = Alignment.Left
-      configLabel.foreground = Color.WHITE
-      configLabel.font = new Font(configLabel.font.getName, Font.BOLD, 18)
-      layout(configLabel) = c
 
       c.gridx = 0
       c.gridy = 1
@@ -217,14 +209,14 @@ trait GUIs { this: MVC =>
 
         pauseButton.text =
           if (model.state == Paused) "Continuer..."
-          else "Pause..."
+          else "Arrêter..."
         pauseButton.enabled = locked
 
         resetButton.enabled = locked
 
         if (model.simpleMode) {
           simpleMode.selected = true
-          statusTitle.text = "Temps pour sauvetage"
+          statusTitle.text = "Temps restant"
           scoreTitle.text = ""
         } else{
           advancedMode.selected = true
