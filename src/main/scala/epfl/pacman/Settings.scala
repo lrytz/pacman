@@ -16,11 +16,14 @@ object Settings {
   // distance in number of pixels that make pacman be eaten
   val overlapThreshold = 10
 
+  // distance at which monsters are considered as "far" away
+  val farDistance = 8
+
   // miliseconds of sleep between one pixel move of a figure
   val sleepTime = 15
 
   // time to survive for completing in simple mode
-  val surviveTime = ticks(30)
+  val surviveTime = ticks(60)
 
   // nb of lives available in advanced mode
   val nbLives = 3
