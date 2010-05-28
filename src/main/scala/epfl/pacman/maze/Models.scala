@@ -223,15 +223,16 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
   }
 
   object ModelDefaults {
-    val pacman = new PacMan(new OffsetPosition(14, 10), Right)
+    val pacman = new PacMan(new OffsetPosition(9, 10), Right)
 
     val monsters: Set[Monster] = {
       Set() + Monster(new OffsetPosition(1,1), Right,  Info) +
-              Monster(new OffsetPosition(28,1), Left,  Info) +
-              Monster(new OffsetPosition(28,18), Left, Cerebro) +
+              Monster(new OffsetPosition(17,1), Left,  Info) +
+              Monster(new OffsetPosition(17,18), Left, Cerebro) +
               Monster(new OffsetPosition(1,18), Right, Cerebro)
     }
 
+/*
     val maze: Set[Wall] = {
       def w(x: Int, y: Int) = Wall(new BlockPosition(x,y))
 
@@ -280,13 +281,42 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
               (for(y <- 17 to 17; x <- 25 to 27)  yield w(x, y)) ++
               (for(y <- 15 to 17; x <- 21 to 22)  yield w(x, y))
     }
+*/
+
+    val maze: Set[Wall] = {
+      val lines =""".
+XXXXXXXXXXXXXXXXXXX.
+X        X        X.
+X XX XXX X XXX XX X.
+X XX XXX X XXX XX X.
+X                 X.
+X XX X XXXXX X XX X.
+X    X   X   X    X.
+XXXX XXX X XXX XXXX.
+XXXX X       X XXXX.
+       XXXXX       .
+XXXX X       X XXXX.
+XXXX X XXXXX X XXXX.
+X        X        X.
+X XX XXX X XXX XX X.
+X  X           X  X.
+XX X X XXXXX X X XX.
+X    X   X   X    X.
+X XXXXXX X XXXXXX X.
+X                 X.
+XXXXXXXXXXXXXXXXXXX""".split(".\n").tail
+
+      Set() ++ { for ((line, y) <- lines.zipWithIndex; (char, x) <- line.zipWithIndex if char == 'X')
+        yield (Wall(new BlockPosition(x, y)))
+      }
+    }
 
     def points: Set[Thingy] = {
       import scala.util.Random.nextInt
       val wallsPos = Set[Position]() ++ maze.map(w => w.pos)
 
       collection.immutable.ListSet[Thingy]() ++
-              (for (x <- 0 to 29; y <- 0 to 19 if !(wallsPos contains BlockPosition(x, y))) yield {
+              (for (x <- 0 until Settings.hBlocks; y <- 0 until Settings.vBlocks if !(wallsPos contains BlockPosition(x, y))) yield {
                 if (nextInt(100) < Settings.superPointsRatio) {
                   SuperPoint(new BlockPosition(x, y))
                 } else {

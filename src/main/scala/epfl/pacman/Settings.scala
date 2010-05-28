@@ -8,7 +8,7 @@ object Settings {
   // only used for computing the size of the game component.
   // painting actually only looks at the model, draws all walls and monsters
   val vBlocks = 20
-  val hBlocks = 30
+  val hBlocks = 19
 
   // size in number of pixels of one block in the maze
   val blockSize  = 30
@@ -42,13 +42,13 @@ object Settings {
 
   // keywords to highlight in the code editor
   val keywords = List("bouge", "reste", "vers", "telQue",
-                      "si", "siChasseur", "siChassé", "siMonstresLoin", "siMonstresPrès",
+                      "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstresPrès", "siMonstresPres",
                       "alterner", "auHasard", "sinon",
-                      "àDroite", "àGauche", "enHaut", "enBas", "enAvant",
+                      "àDroite", "aDroite", "àGauche", "aGauche", "enHaut", "enBas", "enAvant",
                       "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
                       "loinDesMonstres", "versUnMonstre", "loinDesPoints", "versUnPoint",
                       "loinDesCerises", "versUneCerise", "loinDePacMan", "versPacMan",
-                      "enSécuritéPendant")
+                      "enSécuritéPendant", "enSecuritePendant")
 
     /** Convert seconds to ticks */
     private def ticks(s: Int) = s * 1000 / sleepTime
