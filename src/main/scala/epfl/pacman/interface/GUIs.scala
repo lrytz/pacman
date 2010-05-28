@@ -11,7 +11,8 @@ import java.awt.{Font, Color, Insets}
 
 trait GUIs { this: MVC =>
 
-  class PacmanApp extends SimpleSwingApplication {
+  class PacmanScreen extends GridBagPanel {
+    import GridBagPanel._
 
     // not used right now, but this is what they should be...
     //  val width = 10 + Settings.docTextWidth + 10 + Settings.codeTextWidth + 10 + view.width + 10
@@ -73,141 +74,130 @@ trait GUIs { this: MVC =>
       }
     }
 
+    background = Color.BLACK // for windows
+    val c = new Constraints
 
-    def top = new MainFrame {
-      title = "Scala Pacman"
-      background = Color.BLACK
+    val left = new GridBagPanel {
+      background = Color.BLACK // for windows
+      val c = new Constraints
 
-      contents = new GridBagPanel {
-        import GridBagPanel._
-        background = Color.BLACK // for windows
-        val c = new Constraints
+      c.fill = Fill.Horizontal
+      c.gridx = 0
+      c.gridy = 0
+      c.insets = new Insets(10, 10, 15, 10)
+      val codeLabel = new Label("Code de PacMan")
+      codeLabel.xAlignment = Alignment.Left
+      codeLabel.foreground = Color.WHITE
+      codeLabel.font = new Font(codeLabel.font.getName, Font.BOLD, 18)
+      layout(codeLabel) = c
 
-        val left = new GridBagPanel {
-          background = Color.BLACK // for windows
-          val c = new Constraints
+      c.fill = Fill.Vertical
+      c.gridx = 0
+      c.gridy = 1
+      c.weighty = 1.0
+      c.insets = new Insets(5, 10, 5, 10) // top, left, bottom, right
+      layout(code) = c
 
-          c.fill = Fill.Horizontal
-          c.gridx = 0
-          c.gridy = 0
-          c.insets = new Insets(10, 10, 15, 10)
-          val codeLabel = new Label("Code de PacMan")
-          codeLabel.xAlignment = Alignment.Left
-          codeLabel.foreground = Color.WHITE
-          codeLabel.font = new Font(codeLabel.font.getName, Font.BOLD, 18)
-          layout(codeLabel) = c
+      c.fill = Fill.None
+      c.gridx = 0
+      c.gridy = 2
+      c.weighty = 0.0
+      c.insets = new Insets(5, 10, 10, 10)
+      layout(runButton) = c
+    }
+    left.border = new javax.swing.border.LineBorder(Color.GRAY)
 
-          c.fill = Fill.Vertical
-          c.gridx = 0
-          c.gridy = 1
-          c.weighty = 1.0
-          c.insets = new Insets(5, 10, 5, 10) // top, left, bottom, right
-          layout(code) = c
+    c.fill = Fill.Vertical
+    c.gridx = 0
+    c.gridy = 0
+    c.insets = new Insets(10, 10, 10, 10)
+    layout(left) = c
 
-          c.fill = Fill.None
-          c.gridx = 0
-          c.gridy = 2
-          c.weighty = 0.0
-          c.insets = new Insets(5, 10, 10, 10)
-          layout(runButton) = c
-        }
-        left.border = new javax.swing.border.LineBorder(Color.GRAY)
+    c.fill = Fill.None
+    c.gridx = 1
+    c.gridy = 0
+    c.insets = new Insets(10, 10, 10, 10)
+    layout(view) = c
 
-        c.fill = Fill.Vertical
-        c.gridx = 0
-        c.gridy = 0
-        c.insets = new Insets(10, 10, 10, 10)
-        layout(left) = c
+    val right = new GridBagPanel {
+      background = Color.BLACK // for windows
+      val c = new Constraints
 
-        c.fill = Fill.None
-        c.gridx = 1
-        c.gridy = 0
-        c.insets = new Insets(10, 10, 10, 10)
-        layout(view) = c
+      c.fill = Fill.Horizontal
+      c.gridx = 0
+      c.gridy = 0
+      c.insets = new Insets(10, 10, 15, 10) // top, left, bottom, right
+      val configLabel = new Label("Configuration")
+      configLabel.xAlignment = Alignment.Left
+      configLabel.foreground = Color.WHITE
+      configLabel.font = new Font(configLabel.font.getName, Font.BOLD, 18)
+      layout(configLabel) = c
 
-        val right = new GridBagPanel {
-          background = Color.BLACK // for windows
-          val c = new Constraints
+      c.gridx = 0
+      c.gridy = 1
+      c.insets = new Insets(5, 10, 5, 10)
+      layout(simpleMode) = c
 
-          c.fill = Fill.Horizontal
-          c.gridx = 0
-          c.gridy = 0
-          c.insets = new Insets(10, 10, 15, 10) // top, left, bottom, right
-          val configLabel = new Label("Configuration")
-          configLabel.xAlignment = Alignment.Left
-          configLabel.foreground = Color.WHITE
-          configLabel.font = new Font(configLabel.font.getName, Font.BOLD, 18)
-          layout(configLabel) = c
+      c.gridx = 0
+      c.gridy = 2
+      c.insets = new Insets(0, 10, 10, 10)
+      layout(advancedMode) = c
 
-          c.gridx = 0
-          c.gridy = 1
-          c.insets = new Insets(5, 10, 5, 10)
-          layout(simpleMode) = c
+      c.gridx = 0
+      c.gridy = 3
+      c.insets = new Insets(10, 10, 5, 10)
+      layout(pauseButton) = c
 
-          c.gridx = 0
-          c.gridy = 2
-          c.insets = new Insets(0, 10, 10, 10)
-          layout(advancedMode) = c
+      c.gridx = 0
+      c.gridy = 4
+      c.insets = new Insets(5, 10, 10, 10)
+      layout(resetButton) = c
 
-          c.gridx = 0
-          c.gridy = 3
-          c.insets = new Insets(10, 10, 5, 10)
-          layout(pauseButton) = c
+      c.gridx = 0
+      c.gridy = 5
+      c.insets = new Insets(30, 10, 10, 10)
+      layout(scoreTitle) = c
 
-          c.gridx = 0
-          c.gridy = 4
-          c.insets = new Insets(5, 10, 10, 10)
-          layout(resetButton) = c
-
-          c.gridx = 0
-          c.gridy = 5
-          c.insets = new Insets(30, 10, 10, 10)
-          layout(scoreTitle) = c
-
-          c.gridx = 0
-          c.gridy = 6
-          c.insets = new Insets(10, 10, 10, 10)
-          layout(statusTitle) = c
+      c.gridx = 0
+      c.gridy = 6
+      c.insets = new Insets(10, 10, 10, 10)
+      layout(statusTitle) = c
 
 
-          c.fill = Fill.Both
-          c.gridx = 0
-          c.gridy = 7
-          c.weighty = 1.0
-          c.insets = new Insets(10, 10, 10, 10)
-          layout(statusDisplay) = c
-        }
-        right.border = new javax.swing.border.LineBorder(Color.GRAY)
+      c.fill = Fill.Both
+      c.gridx = 0
+      c.gridy = 7
+      c.weighty = 1.0
+      c.insets = new Insets(10, 10, 10, 10)
+      layout(statusDisplay) = c
+    }
+    right.border = new javax.swing.border.LineBorder(Color.GRAY)
 
-        c.fill = Fill.Vertical
-        c.gridx = 2
-        c.gridy = 0
-        c.insets = new Insets(10, 10, 10, 10)
-        layout(right) = c
-
-      }
+    c.fill = Fill.Vertical
+    c.gridx = 2
+    c.gridy = 0
+    c.insets = new Insets(10, 10, 10, 10)
+    layout(right) = c
 
 
-      listenTo(runButton, pauseButton, resetButton, simpleMode, advancedMode)
-      reactions += {
-        case ButtonClicked(`runButton`) =>
-          code.requestFocus()
-          controller ! Compile(code.text)
+    listenTo(runButton, pauseButton, resetButton, simpleMode, advancedMode)
+    reactions += {
+      case ButtonClicked(`runButton`) =>
+        code.requestFocus()
+        controller ! Compile(code.text)
 
-        case ButtonClicked(`pauseButton`) =>
-          controller ! Pause
+      case ButtonClicked(`pauseButton`) =>
+        controller ! Pause
 
-        case ButtonClicked(`resetButton`) =>
+      case ButtonClicked(`resetButton`) =>
+        controller ! Reset(simpleMode.selected)
+
+      case ButtonClicked(`simpleMode`) | ButtonClicked(`advancedMode`) =>
+        if (model.simpleMode != simpleMode.selected)
           controller ! Reset(simpleMode.selected)
 
-        case ButtonClicked(`simpleMode`) | ButtonClicked(`advancedMode`) =>
-          if (model.simpleMode != simpleMode.selected)
-            controller ! Reset(simpleMode.selected)
-      }
-
-      update()
-      maximize()
       code.text = Behavior.defaultBehavior
+      
     }
 
     def update() {
@@ -256,7 +246,11 @@ trait GUIs { this: MVC =>
       }
       // code.repaint() // @TODO
     }
+
+    update()
+
   }
+
 }
 
 

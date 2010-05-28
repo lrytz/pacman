@@ -1,17 +1,22 @@
 package epfl.pacman
 
+import scala.swing._
 import maze.MVC
+import java.awt.Color
 
-object Main {
-  val rnd = new scala.util.Random(System.currentTimeMillis)
+object Main extends SimpleSwingApplication {
 
-  def main(args: Array[String]): Unit = {
-    val mvc = new MVC
+  val mvc = new MVC
 
-    mvc.gui.main(args)
-
-    mvc.controller.start()
-    Thread.sleep(1000)
-    mvc.ticker.start()
+  def top = new MainFrame {
+      title = "Scala Pacman"
+      background = Color.BLACK
+      contents = mvc.gui
+      maximize()
   }
+
+  mvc.controller.start()
+  Thread.sleep(1000)
+  mvc.ticker.start()
+
 }

@@ -53,7 +53,7 @@ abstract class BehaviorCompiler {
 class MVC extends Models with Views with GUIs with Controllers {
   var model = new Model()
   val view = new View()
-  val gui = new PacmanApp()
+  val gui = new PacmanScreen()
   val controller = new Controller()
 
   val compiler = new BehaviorCompiler {
