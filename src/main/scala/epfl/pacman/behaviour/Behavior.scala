@@ -5,23 +5,6 @@ import scala.util.Random.{nextInt => randomInt}
 
 import maze.MVC
 
-/*
-object Behavior {
-  def defaultBehavior =
-"""
-siChasseur {
-  bouge telQue versUnMonstre
-} sinon {
-  siMonstresLoin {
-    bouge telQue versUnPoint
-  } sinon {
-    bouge telQue loinDesMonstres
-  }
-}
-"""
-}
-*/
-
 abstract class Behavior {
   val mvc: MVC
   import mvc._
@@ -52,9 +35,9 @@ abstract class Behavior {
     def siChassé   = si(!model.pacman.hunter) _
     def siChasse   = siChassé
 
-    def siMonstrePrès = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) <  Settings.farDistance) _
+    def siMonstrePrès = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters), Set[Position]()) <  Settings.farDistance) _
     def siMonstrePres = siMonstrePrès
-    def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters)) >= Settings.farDistance) _
+    def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters), Set[Position]()) >= Settings.farDistance) _
 
     def alterner(weight: Int) =
         si(weight > randomInt(100)) _
@@ -131,6 +114,14 @@ abstract class Behavior {
     def loinDePacMan(ds: Directions): Directions =
       maxDistToVia(Set[Position](model.pacman.pos), ds)
 
+    def versPacManSansMonstreSurLeChemin(ds: Directions): Directions = {
+      val withDists = ds.dirs.toSeq.map(dir =>
+        (dir, model.minDistBetween(c.pos, c.pos.nextIn(dir), model.pacman.pos, Set[Position]() ++ model.monsters.collect{ case m /*if m != c*/ => m.pos }))
+      )
+
+      randomBestDir(withDists.sortWith((a, b) => a._2 < b._2))
+    }
+
     def enSécuritéPendant(n: Int)(ds: Directions): Directions = {
       val dirDists = ds.dirs.map(d => (d, model.maxSafePathBetween(model.pacman.pos, d, Set[Position]() ++ model.monsters.map(_.pos), n+1)))
       val okDists = dirDists.filter(d => d._2 > n).toSeq
@@ -201,7 +192,7 @@ abstract class Behavior {
 
     def withDistBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
       directions.toSeq.map(dir =>
-        (dir, model.minDistBetween(c.pos, c.pos.nextIn(dir), to))
+        (dir, model.minDistBetween(c.pos, c.pos.nextIn(dir), to, Set[Position]()))
       )
     }
 
@@ -304,9 +295,9 @@ abstract class DefaultMonsterBehavior extends Behavior {
           }
         } sinon {
           auHasard {
-              bouge telQue versPacMan
+            bouge telQue versPacManSansMonstreSurLeChemin
           } sinon {
-              bouge telQue enAvant
+            bouge telQue enAvant
           }
         }
       }

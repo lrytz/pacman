@@ -6,7 +6,6 @@ import Swing._
 import event.{ButtonClicked, ValueChanged}
 import maze.MVC
 import editor.ScalaPane
-import behaviour.Behavior
 import java.awt.{Font, Color, Insets}
 
 /**
@@ -201,8 +200,7 @@ trait GUIs { this: MVC =>
         if (model.simpleMode != simpleMode.selected)
           controller ! Reset(simpleMode.selected)
 
-      code.text = Behavior.defaultBehavior
-      
+      code.text = ""
     }
 
     def update() {

@@ -18,9 +18,9 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
                    monsters: Set[Monster] = ModelDefaults.monsters,
                    walls: Set[Wall] = ModelDefaults.maze,
                    points: Set[Thingy] = ModelDefaults.points,
-                   simpleMode: Boolean = true,
                    deadMonsters: Set[Monster] = Set(),
                    counters: Counters = new Counters(),
+                   simpleMode: Boolean = true,
                    state: State = Running) {
 
     def resetFigures() = {
@@ -64,18 +64,21 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       allPos.toSeq.apply(nextInt(allPos.size))
     }
 
-    def minDistBetween(init: Position, from: Position, to: Position): Int =
-      minDistBetween(init, from, Set(to))
+    def minDistBetween(init: Position, from: Position, to: Position, exclude: Set[Position]): Int =
+      minDistBetween(init, from, Set(to), exclude)
 
     /**
      * ???
      */
-    def minDistBetween(init: Position, from: Position, to: Set[Position]): Int = {
+    def minDistBetween(init: Position, from: Position, to: Set[Position], exclude: Set[Position]): Int = {
       g.markTargets(to)
+
       if (init != from) {
         //exclude init position
         g.mark(init)
       }
+
+      g.markExcludes(exclude)
 
       val r = g.simpleDistFrom(from, 45)
       g.clear
@@ -120,6 +123,12 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
         }
       }
 
+      def markExcludes(positions: Set[Position]) {
+        for (p <- positions) {
+          nodes(p).color = 1
+        }
+      }
+
       def mark(pos: Position) {
         nodes(pos).color = 1
       }
@@ -133,6 +142,8 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
       def simpleDistFrom(p: Position, max: Int): Int = {
         var toVisit: Set[Node] = Set(nodes(p))
         var dist = 0
+
+        if (toVisit.forall(_.color == 1)) return max;
 
         while (!toVisit.isEmpty && dist < max) {
           dist += 1
