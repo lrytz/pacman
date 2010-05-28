@@ -17,6 +17,10 @@ trait Controllers { mvc: MVC =>
       val mvc: Controllers.this.type = Controllers.this
     }
 
+    private def bonus = model.counters('bonus)
+    private def bonus_=(v: Int) { model.counters('bonus) = v }
+    private def score = model.counters('score)
+    private def score_=(v: Int) { model.counters('score) = v }
     private def tickCounter = model.counters('tick)
     private def tickCounter_=(v: Int) { model.counters('tick) = v }
     private def hunterCounter = model.counters('hunter)
@@ -96,8 +100,12 @@ trait Controllers { mvc: MVC =>
                   // eat points before computing new position and making pacman hunted
                   val newPoints = if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
+                      score += 20
                       newPacman = newPacman.copy(hunter = true)
                       hunterCounter = Settings.ticksToHunt
+                      bonus = 100
+                    } else {
+                      score += 10
                     }
                     model.points - p.get
                   } else {
@@ -196,6 +204,8 @@ trait Controllers { mvc: MVC =>
               if (!omonst.isEmpty) {
                 if (model.pacman.hunter) {
                   // eat the monster
+                  score += bonus
+                  bonus *= 2
                   model = model.copy(monsters = model.monsters - omonst.get, deadMonsters = model.deadMonsters + omonst.get)
                   revivals(omonst.get) = Settings.ticksToRevive
                 } else {
@@ -222,11 +232,14 @@ trait Controllers { mvc: MVC =>
                   model = model.copy(state = GameWon)
                   gui.update()
                 }
+              } else {
+                gui.scoreTitle.text = "Score: "+model.counters('score);
+                gui.scoreTitle.repaint()
               }
 
 
              } else {
-              // simulation is not running, update gmae countdown, die conuter
+              // simulation is not running, update game countdown, die conuter
 
               model.state match {
                 case l @ LifeLost(_) =>

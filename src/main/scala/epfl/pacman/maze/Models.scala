@@ -24,7 +24,10 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
                    state: State = Running) {
 
     def resetFigures() = {
+      val oldScore = counters('score)
       counters.clear()
+      counters('score) = oldScore;
+
       copy(pacman = ModelDefaults.pacman.copy(lives = pacman.lives),
            monsters = ModelDefaults.monsters, deadMonsters = Set())
     }

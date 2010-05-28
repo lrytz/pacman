@@ -44,6 +44,11 @@ trait GUIs { this: MVC =>
     statusTitle.foreground = Color.WHITE
     statusTitle.font = new Font(statusTitle.font.getName, Font.BOLD, 14)
 
+    val scoreTitle = new Label("")
+
+    scoreTitle.foreground = Color.GREEN
+    scoreTitle.font = new Font(scoreTitle.font.getName, Font.BOLD, 14)
+
     val statusDisplay = new Component {
       preferredSize = (200, 10)
 
@@ -157,12 +162,18 @@ trait GUIs { this: MVC =>
 
           c.gridx = 0
           c.gridy = 5
-          c.insets = new Insets(80, 10, 10, 10)
+          c.insets = new Insets(30, 10, 10, 10)
+          layout(scoreTitle) = c
+
+          c.gridx = 0
+          c.gridy = 6
+          c.insets = new Insets(10, 10, 10, 10)
           layout(statusTitle) = c
+
 
           c.fill = Fill.Both
           c.gridx = 0
-          c.gridy = 6
+          c.gridy = 7
           c.weighty = 1.0
           c.insets = new Insets(10, 10, 10, 10)
           layout(statusDisplay) = c
@@ -203,6 +214,7 @@ trait GUIs { this: MVC =>
       onEDT {
         view.repaint()
         statusDisplay.repaint()
+        scoreTitle.repaint()
 
         val locked = model.state match {
           case Loading(_) => false
