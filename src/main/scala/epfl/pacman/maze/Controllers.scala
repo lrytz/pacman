@@ -108,16 +108,12 @@ trait Controllers { mvc: MVC =>
                     } else {
                       score += 10
                     }
-                    model.points - p.get
-                  } else {
-                    model.points
-                  }
+                    model = model.copy(points = model.points - p.get)
 
-                  model = model.copy(points = newPoints)
-
-                  if (newPoints.isEmpty) {
-                    model = model.copy(state = GameWon(Settings.restartTime))
-                    new SoundPlayer("success.wav").start()
+                    if (model.points.isEmpty) {
+                      model = model.copy(state = GameWon(Settings.restartTime))
+                      new SoundPlayer("success.wav").start()
+                    }
                   }
 
                   // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
@@ -319,7 +315,9 @@ trait Controllers { mvc: MVC =>
             model.state match {
               case Loading(_) | CompileError(_) => ()
               case _ =>
-                model = new Model(simpleMode = simpleMode)
+                val points: Set[Thingy] = if (simpleMode) Set()
+                                          else ModelDefaults.points
+                model = new Model(simpleMode = simpleMode, points = points)
             }
             gui.update()
         }

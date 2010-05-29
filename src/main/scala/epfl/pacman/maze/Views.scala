@@ -39,10 +39,9 @@ trait Views { this: MVC =>
       import java.awt.RenderingHints.{KEY_ANTIALIASING, VALUE_ANTIALIAS_ON}
       g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-      if (!model.simpleMode)
-        for (p <- model.points) {
-          drawPoint(p, g)
-        }
+      for (p <- model.points) {
+        drawPoint(p, g)
+      }
 
       for (m <- model.monsters) {
         drawMonster(m, g)
