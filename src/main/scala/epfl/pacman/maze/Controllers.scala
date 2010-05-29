@@ -87,6 +87,8 @@ trait Controllers { mvc: MVC =>
                *  - revive dead monsters
                */
 
+              var modelWithOldPacmanPosition = model
+
               // in hunter mode, we need to compute pacman's position more often
               if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.hunter)) {
 
@@ -102,7 +104,7 @@ trait Controllers { mvc: MVC =>
                       score += 20
                       model = model.copy(pacman = model.pacman.copy(hunter = true))
                       hunterCounter = Settings.ticksToHunt
-                      if (model.pacman.hunter != true) {
+                      if (!model.pacman.hunter) {
                         bonus = 100
                       }
                     } else {
@@ -114,6 +116,7 @@ trait Controllers { mvc: MVC =>
                       model = model.copy(state = GameWon(Settings.restartTime))
                       new SoundPlayer("success.wav").start()
                     }
+                    gui.update()
                   }
 
                   // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
@@ -122,9 +125,13 @@ trait Controllers { mvc: MVC =>
                   }
                 }
 
+                // fairness: pacman knows he just ate a cherry, so monsters also should know that.
+                // however, pacman doesn't know the monster's new position, so the monsters also don't
+                // know pacman's.
+                modelWithOldPacmanPosition = model
+
                 // update pacman's position
                 val (pos, dir, stopped) = validateDir(model, model.pacman, pacmanBehavior.next(model, model.pacman))
-
                 model = model.copy(pacman = model.pacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped))
               }
 
@@ -136,7 +143,8 @@ trait Controllers { mvc: MVC =>
 
                 // compute next block position if all the small steps have been painted
                 var newMonsters = model.monsters.map(monster => {
-                  val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(model, monster))
+                  // use the model with pacman's old position for computing the monster's next position (more fair!)
+                  val (pos, dir, stopped) = validateDir(model, monster, monsterBehavior.next(modelWithOldPacmanPosition, monster))
                   val animMode  = (model.minDistBetween(monster.pos, monster.pos, model.pacman.pos, Set[Position]()) < 10) && !model.pacman.hunter
                   monster.copy(pos = makeOffsetPosition(pos, dir, stopped),
                                dir = dir,
@@ -220,8 +228,8 @@ trait Controllers { mvc: MVC =>
 
                     new SoundPlayer("dead.wav").start()
                   }
-                  gui.update()
                 }
+                gui.update()
               }
 
 
@@ -234,8 +242,6 @@ trait Controllers { mvc: MVC =>
                   new SoundPlayer("success.wav").start()
                   gui.update()
                 }
-              } else {
-                gui.update()
               }
 
 
