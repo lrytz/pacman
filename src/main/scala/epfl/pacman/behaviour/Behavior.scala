@@ -179,9 +179,13 @@ abstract class Behavior {
     }
 
     def randomBestDir(positions: Seq[(Direction, Int)]): Directions = {
-      val best = positions.filter(_._2 == positions.head._2)
+      if (positions.size > 0) {
+        val best = positions.filter(_._2 == positions.head._2)
 
-      Directions(Set[Direction]() + best(randomInt(best.size))._1)
+        Directions(Set[Direction]() + best(randomInt(best.size))._1)
+      } else {
+        NoDirections
+      }
     }
 
     def withPathBetween(directions: Set[Direction], to: Set[Position]): Seq[(Direction, Int)] = {
@@ -215,7 +219,8 @@ abstract class Behavior {
     } catch {
       case e =>
         println("Exception in next(): "+ e)
-        None
+        e.printStackTrace
+        None 
     }
   }
 
@@ -239,7 +244,11 @@ abstract class Behavior {
      def vers(cond: Filter) = telQue(cond)
 
      def ouAlors(body: => Directions) = {
-        Condition(() => !dirs.isEmpty, () => this, Some(() => body))
+        if (!dirs.isEmpty) {
+            this
+        } else {
+            body
+        }
      }
      def sinon(body: => Directions) = ouAlors(body)
   }
