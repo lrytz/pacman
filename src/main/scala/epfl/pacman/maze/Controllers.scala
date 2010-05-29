@@ -104,7 +104,9 @@ trait Controllers { mvc: MVC =>
                       score += 20
                       newPacman = newPacman.copy(hunter = true)
                       hunterCounter = Settings.ticksToHunt
-                      bonus = 100
+                      if (model.pacman.hunter != true) {
+                        bonus = 100
+                      }
                     } else {
                       score += 10
                     }
