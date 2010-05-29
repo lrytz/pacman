@@ -9,8 +9,8 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
   case object Running extends State
   case object Paused extends State
   case class Loading(next: State) extends State
-  case object GameOver extends State
-  case object GameWon extends State
+  case class GameOver(var delay: Int) extends State
+  case class GameWon(var delay: Int) extends State
   case class LifeLost(var delay: Int) extends State
   case class CompileError(next: State) extends State
 

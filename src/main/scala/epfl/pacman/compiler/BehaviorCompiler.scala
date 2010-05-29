@@ -48,7 +48,7 @@ object Factory {
       new java.io.File(l.toURI).getAbsolutePath
     }
     import java.io.File.{pathSeparator => %}
-    pathOf(this.getClass) + % + pathOf(classOf[ScalaObject]) + % + pathOf(classOf[Global])
+    pathOf(this.getClass) + % + pathOf(classOf[ScalaObject]) + % + pathOf(classOf[Global]) + % + pathOf(classOf[scala.swing.Dialog])
   }
 
   private val outDir = new VirtualDirectory("(memory)", None)
@@ -108,11 +108,6 @@ object Factory {
       override def run() {
 
         val (line, lengths) = (body.split("\n") :\ (("", List[Int]())))((line, acc) => (line + " " + acc._1, (line.length+1) :: acc._2))
-
-for ((line, length) <- body.split("\n").zip(lengths)) {
-  assert(line.length == length - 1)
-  println(line + ", "+ length)
-}
 
         val source = template.format(line)
         val run = new global.Run

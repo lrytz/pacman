@@ -53,8 +53,8 @@ trait Views { this: MVC =>
 
       if (model.state != Running) {
         val cv = model.state match {
-          case GameOver => 0x44ff0000
-          case GameWon => 0x4400ff00
+          case GameOver(_) => 0x44ff0000
+          case GameWon(_) => 0x4400ff00
           case _ => 0x44ffffff
         }
         g.setColor(new Color(cv, true))
@@ -63,9 +63,9 @@ trait Views { this: MVC =>
         val msg = model.state match {
           case Paused => "Jeu arrêté."
           case Loading(_) => "Traduction des ordres..."
-          case GameOver => "Perdu :-("
-          case GameWon if model.simpleMode => "Bravo! Tu as gagné le badge."
-          case GameWon => "Bravo! Tu as gagné le jeu."
+          case GameOver(_) => "Perdu :-("
+          case GameWon(_) if model.simpleMode => "Bravo! Tu as gagné le badge."
+          case GameWon(_) => "Bravo! Tu as gagné le jeu."
           case LifeLost(_) => "Une vie perdue."
           case CompileError(_) => "Le code est faux :-("
         }

@@ -1,3 +1,4 @@
+
 package epfl.pacman
 package maze
 
@@ -115,7 +116,7 @@ trait Controllers { mvc: MVC =>
                   model = model.copy(points = newPoints)
 
                   if (newPoints.isEmpty)
-                    model = model.copy(state = GameWon)
+                    model = model.copy(state = GameWon(Settings.restartTime))
 
                   // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
                   if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {
@@ -211,14 +212,14 @@ trait Controllers { mvc: MVC =>
                 } else {
                   // monster eats pacman
                   if (model.simpleMode) {
-                    model = model.copy(state = GameOver)
+                    model = model.copy(state = GameOver(Settings.restartTime))
                     new SoundPlayer("dead.wav").start()
                   } else {
                     model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
                     if (model.pacman.lives > 0)
                       model = model.copy(state = LifeLost(Settings.dieTime))
                     else
-                      model = model.copy(state = GameOver)
+                      model = model.copy(state = GameOver(Settings.restartTime))
 
                     new SoundPlayer("dead.wav").start()
                   }
@@ -232,7 +233,7 @@ trait Controllers { mvc: MVC =>
                 timeCounter -= 1
                 gui.statusDisplay.repaint()
                 if (timeCounter == 0) {
-                  model = model.copy(state = GameWon)
+                  model = model.copy(state = GameWon(Settings.restartTime))
                   new SoundPlayer("success.wav").start()
                   gui.update()
                 }
@@ -252,6 +253,18 @@ trait Controllers { mvc: MVC =>
                       model = model.resetFigures().copy(state = Running)
                       view.repaint()
                     }
+                  }
+
+                case o @ GameOver(_) if Settings.demoMode =>
+                  o.delay -= 1
+                  if (o.delay == 0) {
+                    controller ! Reset(model.simpleMode)
+                  }
+
+                case o @ GameWon(_) if Settings.demoMode =>
+                  o.delay -= 1
+                  if (o.delay == 0) {
+                    controller ! Reset(model.simpleMode)
                   }
 
                 case _ => ()
@@ -291,7 +304,7 @@ trait Controllers { mvc: MVC =>
             val Loading(next) = model.state
             model = model.copy(state = next)
             next match {
-              case GameOver | GameWon =>
+              case GameOver(_) | GameWon(_) =>
                 controller ! Reset(model.simpleMode)
               case Paused =>
                 controller ! Pause

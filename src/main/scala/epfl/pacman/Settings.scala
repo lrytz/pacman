@@ -31,6 +31,8 @@ object Settings {
   // time between getting eaten and re-starting the game
   val dieTime = ticks(3)
 
+  val restartTime = ticks(6)
+
   // number of half ticks (fast pacman's ticks) for the hunter mode to last
   val ticksToHunt = 20
 
@@ -42,7 +44,7 @@ object Settings {
 
   // keywords to highlight in the code editor
   val keywords = List("bouge", "reste", "vers", "telQue",
-                      "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstrePrès", "siMonstrePres",
+                      "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstrePrès", "siMonstrePres", "siMonstresPrès", "siMonstresPres",
                       "alterner", "auHasard", "sinon", "ouAlors",
                       "àDroite", "aDroite", "àGauche", "aGauche", "enHaut", "enBas", "enAvant",
                       "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
@@ -50,6 +52,9 @@ object Settings {
                       "loinDesCerises", "versUneCerise", "loinDePacMan", "versPacMan",
                       "enSécuritéPendant", "enSecuritePendant")
 
-    /** Convert seconds to ticks */
-    private def ticks(s: Int) = s * 1000 / sleepTime
+  /** Convert seconds to ticks */
+  private def ticks(s: Int) = s * 1000 / sleepTime
+
+  // Restart game automatically upon GameOver / GameWon
+  val demoMode = false
 }
