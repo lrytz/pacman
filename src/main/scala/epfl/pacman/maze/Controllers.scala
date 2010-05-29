@@ -212,12 +212,15 @@ trait Controllers { mvc: MVC =>
                   // monster eats pacman
                   if (model.simpleMode) {
                     model = model.copy(state = GameOver)
+                    new SoundPlayer("dead.wav").start()
                   } else {
                     model = model.copy(pacman = model.pacman.copy(lives = model.pacman.lives-1))
                     if (model.pacman.lives > 0)
                       model = model.copy(state = LifeLost(Settings.dieTime))
                     else
                       model = model.copy(state = GameOver)
+
+                    new SoundPlayer("dead.wav").start()
                   }
                   gui.update()
                 }
@@ -230,6 +233,7 @@ trait Controllers { mvc: MVC =>
                 gui.statusDisplay.repaint()
                 if (timeCounter == 0) {
                   model = model.copy(state = GameWon)
+                  new SoundPlayer("success.wav").start()
                   gui.update()
                 }
               } else {

@@ -1,7 +1,7 @@
 package epfl.pacman
 package maze
 
-import epfl.pacman.interface.GUIs
+import epfl.pacman.interface._
 import compiler.BehaviorCompiler
 
 /*
@@ -50,7 +50,7 @@ abstract class BehaviorCompiler {
 
 */
 
-class MVC extends Models with Views with GUIs with Controllers {
+class MVC extends Models with Views with GUIs with Sounds with Controllers {
   var model = new Model()
   val view = new View()
   val gui = new PacmanScreen()
