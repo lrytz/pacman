@@ -73,7 +73,7 @@ class ScalaPane extends Component { thisPane =>
     }
 
     def revealKeywords(textStyle: AttributeSet, keywordStyle: AttributeSet): Unit = checkGen {
-      val separators = new Regex(""" |\.|\(|\)|,""") // must be single characters
+      val separators = new Regex(""" |\.|\(|\)|,|\t""") // must be single characters
       val text = separators.replaceAllIn(text0, " ")
       def highlight0(startChar: Int, word: String): Unit =
         if (keywords exists { k => (k compareTo word) == 0 }) {
