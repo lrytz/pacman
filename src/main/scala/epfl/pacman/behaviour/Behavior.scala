@@ -102,16 +102,32 @@ abstract class Behavior {
       maxWeightedDistToVia(Set[Position]() ++ model.monsters.map(_.pos), ds, directionsEnAvant, 5)
 
     def versUnPoint(ds: Directions): Directions =
-      minDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
+      if (model.points.isEmpty) {
+        NoDirections
+      } else {
+        minDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
+      }
 
     def loinDesPoints(ds: Directions): Directions =
-      maxDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
+      if (model.points.isEmpty) {
+        NoDirections
+      } else {
+        maxDistToVia(Set[Position]() ++ model.points.map(_.pos), ds)
+      }
 
     def versUneCerise(ds: Directions): Directions =
-      minDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+      if (!model.points.exists(p => p.isInstanceOf[SuperPoint])) {
+        NoDirections
+      } else {
+        minDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+      }
 
     def loinDesCerises(ds: Directions): Directions =
-      maxDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+      if (!model.points.exists(p => p.isInstanceOf[SuperPoint])) {
+        NoDirections
+      } else {
+        maxDistToVia(Set[Position]() ++ model.points.collect{ case SuperPoint(pos) => pos }, ds)
+      }
  
     def versPacMan(ds: Directions): Directions =
       minDistToVia(Set[Position](model.pacman.pos), ds)
