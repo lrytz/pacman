@@ -115,8 +115,10 @@ trait Controllers { mvc: MVC =>
 
                   model = model.copy(points = newPoints)
 
-                  if (newPoints.isEmpty)
+                  if (newPoints.isEmpty) {
                     model = model.copy(state = GameWon(Settings.restartTime))
+                    new SoundPlayer("success.wav").start()
+                  }
 
                   // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
                   if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {

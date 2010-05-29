@@ -37,7 +37,7 @@ object Settings {
   val ticksToHunt = 20
 
   // number of major ticks until monster revives
-  val ticksToRevive = 30
+  val ticksToRevive = 25
 
   // percent of points that are super points
   val superPointsRatio = 5
