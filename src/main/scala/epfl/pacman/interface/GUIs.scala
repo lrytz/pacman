@@ -191,8 +191,6 @@ trait GUIs { this: MVC =>
       case ButtonClicked(`simpleMode`) | ButtonClicked(`advancedMode`) =>
         if (model.simpleMode != simpleMode.selected)
           controller ! Reset(simpleMode.selected)
-
-      code.text = ""
     }
 
     def update() {

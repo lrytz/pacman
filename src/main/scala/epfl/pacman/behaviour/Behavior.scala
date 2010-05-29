@@ -40,7 +40,7 @@ abstract class Behavior {
     def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters), Set[Position]()) >= Settings.farDistance) _
 
     def alterner(weight: Int) =
-        si(weight > randomInt(100)) _
+        si(weight < randomInt(100)) _
 
     def auHasard = alterner(50)
 
@@ -286,18 +286,22 @@ abstract class DefaultMonsterBehavior extends Behavior {
   import mvc._
   def getMethod(model: Model, p: Figure) = {
     new NextMethod(model, p) {
-      def apply = {
+      def apply = /*bouge vers enAvant*/ {
         siChasseur {
           auHasard {
-            bouge telQue loinDePacMan
+            bouge vers loinDePacMan
           } sinon {
-            bouge telQue enAvant
+            bouge vers enAvant
           }
         } sinon {
-          auHasard {
-            bouge telQue versPacManSansMonstreSurLeChemin
+          alterner(25) {
+            bouge vers enAvant telQue versPacMan
           } sinon {
-            bouge telQue enAvant
+            alterner(10) {
+              bouge
+            } sinon {
+              bouge vers enAvant
+            }
           }
         }
       }

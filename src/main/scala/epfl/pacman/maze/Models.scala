@@ -302,17 +302,17 @@ X XX XXX X XXX XX X.
 X                 X.
 X XX X XXXXX X XX X.
 X    X   X   X    X.
-XXXX XXX X XXX XXXX.
-XXXX X       X XXXX.
+X XX XXX X XXX XXXX.
+X XX X       X XXXX.
        XXXXX       .
-XXXX X       X XXXX.
-XXXX X XXXXX X XXXX.
+XXXX X       X XX X.
+XXXX X XXXXX X XX X.
 X        X        X.
 X XX XXX X XXX XX X.
 X  X           X  X.
 XX X X XXXXX X X XX.
 X    X   X   X    X.
-X XXXXXX X XXXXXX X.
+X XX XXX X XXX XX X.
 X                 X.
 XXXXXXXXXXXXXXXXXXX""".split(".\n").tail
 

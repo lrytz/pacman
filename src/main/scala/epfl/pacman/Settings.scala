@@ -17,13 +17,13 @@ object Settings {
   val overlapThreshold = 10
 
   // distance at which monsters are considered as "far" away
-  val farDistance = 8
+  val farDistance = 7
 
   // miliseconds of sleep between one pixel move of a figure
   val sleepTime = 15
 
   // time to survive for completing in simple mode
-  val surviveTime = ticks(60)
+  val surviveTime = ticks(30)
 
   // nb of lives available in advanced mode
   val nbLives = 3
@@ -32,18 +32,18 @@ object Settings {
   val dieTime = ticks(3)
 
   // number of half ticks (fast pacman's ticks) for the hunter mode to last
-  val ticksToHunt = 16
+  val ticksToHunt = 20
 
   // number of major ticks until monster revives
-  val ticksToRevive = 20
+  val ticksToRevive = 30
 
   // percent of points that are super points
-  val superPointsRatio = 4
+  val superPointsRatio = 5
 
   // keywords to highlight in the code editor
   val keywords = List("bouge", "reste", "vers", "telQue",
-                      "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstresPrès", "siMonstresPres",
-                      "alterner", "auHasard", "sinon",
+                      "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstrePrès", "siMonstrePres",
+                      "alterner", "auHasard", "sinon", "ouAlors",
                       "àDroite", "aDroite", "àGauche", "aGauche", "enHaut", "enBas", "enAvant",
                       "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
                       "loinDesMonstres", "versUnMonstre", "loinDesPoints", "versUnPoint",

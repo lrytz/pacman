@@ -93,7 +93,6 @@ object Factory {
   private val global = new Global(settings, reporter)
 
   private def columnToLine(column: Int, lengths: List[Int]) = {
-    println("column: "+ column)
     val r: (Int, Int) = ((0, 1) /: lengths)((sumLine, lineLength) => {
       val sum = sumLine._1 + lineLength
       if (column > sum)
