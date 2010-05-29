@@ -102,11 +102,11 @@ trait Controllers { mvc: MVC =>
                   if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
                       score += 20
-                      model = model.copy(pacman = model.pacman.copy(hunter = true))
-                      hunterCounter = Settings.ticksToHunt
                       if (!model.pacman.hunter) {
                         bonus = 100
                       }
+                      model = model.copy(pacman = model.pacman.copy(hunter = true))
+                      hunterCounter = Settings.ticksToHunt
                     } else {
                       score += 10
                     }
