@@ -149,7 +149,7 @@ abstract class Behavior {
 
       if (okDists.size > 0) {
         // Return only the direction with top safe path
-        Directions(Set[Direction]() + okDists.sortWith((a,b) => a._2 > b._2).head._1)
+        Directions(Set[Direction]() ++ okDists.sortWith((a,b) => a._2 > b._2).map(_._1))
       } else {
         NoDirections
       }
@@ -184,7 +184,8 @@ abstract class Behavior {
     }
 
     def minDistToVia(to: Set[Position], ds: Directions) = {
-      randomBestDir(withDistBetween(ds.dirs, to).sortWith((a, b) => a._2 < b._2))
+      val dists = withDistBetween(ds.dirs, to).sortWith((a, b) => a._2 < b._2)
+      randomBestDir(dists)
     }
 
     def maxDistToVia(to: Set[Position], ds: Directions) = {
