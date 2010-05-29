@@ -36,8 +36,13 @@ abstract class Behavior {
     def siChasse   = siChassé
 
     def siMonstrePrès = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters), Set[Position]()) <  Settings.farDistance) _
+    def siMonstresPrès = siMonstrePrès
     def siMonstrePres = siMonstrePrès
+    def siMonstresPres = siMonstrePrès
+
     def siMonstresLoin = si(model.minDistBetween(model.pacman.pos, model.pacman.pos, positions(model.monsters), Set[Position]()) >= Settings.farDistance) _
+
+    def siMonstreLoin = siMonstresLoin
 
     def alterner(weight: Int) =
         si(weight < randomInt(100)) _
