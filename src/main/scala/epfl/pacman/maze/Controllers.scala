@@ -90,8 +90,6 @@ trait Controllers { mvc: MVC =>
               // in hunter mode, we need to compute pacman's position more often
               if (tickCounter == 0 || (tickCounter == Settings.blockSize/2 && model.pacman.hunter)) {
 
-                var newPacman = model.pacman
-
                 if (!model.simpleMode) {
                   if (hunterCounter > 0)
                     hunterCounter -= 1
@@ -99,10 +97,10 @@ trait Controllers { mvc: MVC =>
                   val p = model.points.find(p => p.pos == model.pacman.pos)
 
                   // eat points before computing new position and making pacman hunted
-                  val newPoints = if (!p.isEmpty) {
+                  if (!p.isEmpty) {
                     if (p.get.isInstanceOf[SuperPoint]) {
                       score += 20
-                      newPacman = newPacman.copy(hunter = true)
+                      model = model.copy(pacman = model.pacman.copy(hunter = true))
                       hunterCounter = Settings.ticksToHunt
                       if (model.pacman.hunter != true) {
                         bonus = 100
@@ -119,16 +117,15 @@ trait Controllers { mvc: MVC =>
                   }
 
                   // make pacman hunted (only do it on major tick: otherwise pacman might make a jump for half a box)
-                  if (newPacman.hunter && hunterCounter == 0 && tickCounter == 0) {
-                    newPacman = newPacman.copy(hunter = false)
+                  if (model.pacman.hunter && hunterCounter == 0 && tickCounter == 0) {
+                    model = model.copy(pacman = model.pacman.copy(hunter = false))
                   }
                 }
 
                 // update pacman's position
-                val (pos, dir, stopped) = validateDir(model, newPacman, pacmanBehavior.next(model, newPacman))
-                newPacman = newPacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped)
+                val (pos, dir, stopped) = validateDir(model, model.pacman, pacmanBehavior.next(model, model.pacman))
 
-                model = model.copy(pacman = newPacman)
+                model = model.copy(pacman = model.pacman.copy(makeOffsetPosition(pos, dir, stopped), dir, stopped))
               }
 
 
