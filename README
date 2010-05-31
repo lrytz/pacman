@@ -1,0 +1,147 @@
+== IDEAS FOR IMPROVEMENTS ==
+
+
+= enrich the language =
+
+1. filters like "versUneCerise" or "versUnMonstre" only return one direction.
+when one writes "versUnMonstre telQue loinDesCerises", and the two are not
+the same, then she gets no direction (pacman stops).
+
+if the filters would instead return a sequence of directions (the first
+being the best), we could allow multiple filters.
+
+
+2. there should be a new filter allowing to avoid things, such as
+"pasDeMonstreSurChemin", "pasDeCeriseSurChemin"
+
+
+3. we should give access to more data in the model
+ - distance to all monsters, cherries, points (not only to the closest)
+ - number of lives
+ - time remaining as a hunter
+ - number of cherries
+ - number monsters alive
+
+
+
+= time =
+
+in simple mode, the time to survive (30s) does not depend on the animation
+speed (Settings.sleepTime). so for slower animation it gets easier. it should
+rather be a certain number of big ticks.
+
+
+
+= error reporting =
+
+error reporting is often not helpful, for instance if you miss-spell an
+operaotr such as "telQue", the receiver will be highlighted, not the
+operator. also, always an entire line is marked as wrong (positions are
+just mapped to lines..)
+
+
+
+= relax on spelling =
+
+for the kids, the pacman language should forgive more errors like
+ - not using camelCase
+ - have more aliases ("bouge vers" = "aller vers")
+ - maybe even allow space-separated directions ("vers un monstre" =
+   "versUnMonstre")
+
+
+
+= active debugging =
+
+by viktor kuncak: For learning to program, one useful addition might
+be to have a replay debugger, where one could see which conditions
+evaluated to 'true' and which actions were executed by the pacman. If
+all randomness was given by a pseudo-random generator, a (bounded)
+replay should not be too hard and should be reasonably efficient, since
+there is a discrete notion of time. To see which part was executed,
+it seems sufficient to add to DSL a comment combinator, of type
+
+  comment : String => T => T
+
+such that (comment "Foo" action) behaves just as 'action' but stores
+"Foo" on a stack that is used to explain which actions got triggered.
+
+
+
+= fairness =
+
+the number of cherries, and maybe also their location, should  be fixed,
+otherwise one needs to be just very lucky to get a high score.
+
+
+
+= doc =
+
+there should be a documentation which explains more step-by-step, so that
+people can actually start solving the thing by themselves, without somebody
+explaining them ("bogue", then "bouge vers direction", then "siMonstresLoin",
+then, "siChasseur", then "telQue enSecuritePendant", ...)
+
+
+
+= multi-player =
+
+by viktor kuncak: some sort of multiplayer version where two (or more) can
+code "against" each other could create a potentially infinite amount of
+enthusiasm.
+
+
+
+= imporved text editor =
+
+automatic indention and highlighting matching paranthesis would help.
+also, undo with "Control-Z" does not work.
+
+
+
+= speed adjustment =
+
+a slider allowing to adjust the game speed (simple to implement,
+Settings.sleepTime). For small delayTimes, we should reduce the frame
+rate (re-compute the frames only in every second iteration)
+
+
+
+= memory buttons =
+
+a set of 3 or 5 memory locations where users can store their code and re-load
+it later (just in memory is fine)
+
+
+
+
+
+== SOLUTIONS ==
+
+= make a lot of points =
+siChasse (
+  si (distanceVersCerise > 1) (
+    bouge telQue enSecuritePendant(3)
+    telQue versUneCerise
+    sinon
+    bouge telQue enSecuritePendant(3)
+    telQue versUnPoint
+    sinon
+    bouge telQue loinDesMonstres
+  ) sinon (
+    si (distanceVersMonstre < 4) (
+      bouge telQue versUneCerise
+    ) sinon reste
+  )
+) sinon (
+  si ((distanceVersCerise < 5 &&
+        distanceVersMonstre > 8) ||
+       distanceVersMonstre > 12 ||
+       distanceVersCerise < 2) (
+    bouge telQue versUneCerise
+    sinon
+    bouge telQue versUnMonstre
+  ) sinon (
+    bouge telQue versUnMonstre
+  )
+)
