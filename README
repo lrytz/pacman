@@ -115,6 +115,13 @@ it later (just in memory is fine)
 
 
 
+= packaging =
+
+ - use proguard to create a single .jar
+ - applet
+
+
+
 
 == SOLUTIONS ==
 
