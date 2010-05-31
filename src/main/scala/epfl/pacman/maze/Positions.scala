@@ -27,9 +27,9 @@ trait Positions { this: Models =>
     }
   }
 
-  case class BlockPosition(val x: Int, val y: Int) extends Position
+  case class BlockPosition(x: Int, y: Int) extends Position
 
-  case class OffsetPosition(val x: Int, val y: Int, var xo: Int = 0, var yo: Int = 0) extends Position {
+  case class OffsetPosition(x: Int, y: Int, var xo: Int = 0, var yo: Int = 0) extends Position {
     def overlaps(other: OffsetPosition) = {
       val s = Settings.blockSize
 
