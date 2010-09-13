@@ -1,4 +1,8 @@
+/pacman.iml
+/pacman.ipr
+/pacman.iws
 /target/
+/out/
 /lib_managed/
 /project/boot/
 /project/build/target/

@@ -10,13 +10,13 @@ trait Sounds { this: MVC =>
 
         val buffer_size = 524288
 
-        private def soundURL(name: String) = {
+        private def soundURL(name: String) = this.getClass.getResource("/"+ name) /* {
           val resourceURL = this.getClass.getResource("/"+ name)
           if (resourceURL != null)
             resourceURL
           else
             new File("src/main/resources/"+ name).toURI.toURL
-        }
+        }*/
 
         override def run = {
             val audioIS = AudioSystem.getAudioInputStream(soundURL(filename))

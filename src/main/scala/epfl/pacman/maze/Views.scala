@@ -114,13 +114,13 @@ trait Views { this: MVC =>
       g.fillArc(centerX - radius, centerY - radius, 2*radius, 2*radius, startAngle, 360 - 2*angle)
     }
 
-    private def imageURL(name: String) = {
+    private def imageURL(name: String) = this.getClass.getResource("/"+ name) /*{
       val resourceURL = this.getClass.getResource("/"+ name)
       if (resourceURL != null)
         resourceURL
       else
         new File("src/main/resources/"+ name).toURI.toURL
-    }
+    }*/
 
     val cherryImg = ImageIO.read(imageURL("cherry.png"))
 

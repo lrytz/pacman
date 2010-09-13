@@ -29,13 +29,13 @@ trait GUIs { this: MVC =>
     code.preferredSize = (Settings.codeTextWidth, 0)
     //code.notifyUpdate() // should highlight existing text, doesnt' work..
 
-    val runButton = new Button("Charger les ordres")
+    val runButton = new Button(text("loadButton"))
 
-    val simpleMode = new RadioButton("Mode simple (badge)")
+    val simpleMode = new RadioButton(text("simpleButton"))
     simpleMode.background = Color.BLACK // for windows
     simpleMode.foreground = Color.WHITE
     simpleMode.selected = true
-    val advancedMode = new RadioButton("Mode avancé (avec points)")
+    val advancedMode = new RadioButton(text("advancedButton"))
     advancedMode.background = Color.BLACK // for windows
     advancedMode.foreground = Color.WHITE
     val modeGroup = new ButtonGroup(simpleMode, advancedMode)
