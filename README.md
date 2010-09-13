@@ -1,6 +1,6 @@
 # Programmable Pacman
 
-## Intorduction
+## Introduction
 
 The idea of this project is to introduce kids to programming in a playful
 and fun way.
@@ -49,6 +49,17 @@ There is a lot of space for contributions! For bugfixes, see the list
 of open [tickets](http://github.com/soundrabbit/pacman/issues)
 
 For new features, see the list below.
+
+
+### Screenshots
+
+Simple mode:  
+[<img src="http://lamp.epfl.ch/~rytz/pacman/simple_small.png" width="890" height="448" alt="simple mode"/>](http://lamp.epfl.ch/~rytz/pacman/simple.png)
+
+Advanced mode:  
+[<img src="http://lamp.epfl.ch/~rytz/pacman/advanced_small.png" width="890" height="448" alt="simple mode"/>](http://lamp.epfl.ch/~rytz/pacman/advanced.png)
+
+
 
 
 
@@ -182,7 +193,7 @@ high score and display it on the web.
 
 
 
-### imporved text editor
+### improved text editor
 
 automatic indention and highlighting matching paranthesis would help.
 also, undo with "Control-Z" does not work.
