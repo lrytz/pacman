@@ -9,7 +9,7 @@ object Main extends SimpleSwingApplication {
   val mvc = new MVC
 
   def top = new MainFrame {
-      title = "PacMan, édition Scala"
+      title = mvc.text("titleText")
       background = Color.BLACK
       contents = mvc.gui
       maximize()

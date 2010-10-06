@@ -38,9 +38,44 @@ fun. Some [impressions][2].
 
 ### Documentation
 
-The DSL is described and explained in the file doc/documentation.pdf
-(currently only in French, contributions welcome).
+A a very short introduction to the DSL (french and english). It is also described and
+explained in the file doc/documentation.pdf (currently only in French, contributions
+welcome).
 
+At first, Pacman doesn't move.
+
+- "bouge"/"move": returns a Set[Direction] where he can go without hitting a wall. The runtime
+     selects one randomly. So the simplest behavior "bouge"/"move" makes him move randomly.
+
+- "telQue"/"suchThat" or "vers"/"to": they are identical, allow you to filter the direction
+
+Example: the behavior
+  -> "bouge vers aDroite" / "move to right"
+makes him move to the right.
+
+There are smarter filters, like "loinDesMonstres"/"farFromMonsters", which yields the direction
+maximizing the minimal distance to a monster.
+  -> "bouge telQue loinDesMonstres" / "move suchThat farFromMonsters"
+
+
+Other filters
+ - "versUnMonstre" / "toAMonster"
+ - "enSecuritePendant(n)" / "inSecurityFor(n)", a path where he can safely go for n steps
+
+If you filter to the empty, you can put "sinon"/"otherwise"
+
+  -> "(bouge telQue enSecuritePendant(10)) sinon (bouge telQue loinDesMonstres)" /
+     "(move suchThat inSecurityFor(10)) otherwise (move suchThat farFromMonsters)"
+
+
+
+Finally, there are conditions such as
+ - "siChasseur" / "ifHunter"
+ - "siMonstresLoin" / "ifMonstersFar"
+
+they can be used to make him behave according to the game state
+  -> "siChasseur (bouge telQue versUnMonstre) sinon (bouge telQue loinDesMonstres)" /
+     "ifHunter (move suchThat toAMonster) else (move suchThat awayFromMonsters)"
 
 
 ### Contribute

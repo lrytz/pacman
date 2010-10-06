@@ -42,7 +42,7 @@ trait GUIs { this: MVC =>
 
     val pauseButton = new Button("")
 
-    val resetButton = new Button("Recommencer..")
+    val resetButton = new Button(text("restartButton"))
 
     val statusTitle = new Label("")
     statusTitle.foreground = Color.WHITE
@@ -89,7 +89,7 @@ trait GUIs { this: MVC =>
       c.gridx = 0
       c.gridy = 0
       c.insets = new Insets(10, 10, 15, 10)
-      val codeLabel = new Label("Les ordres pour sauver PacMan:")
+      val codeLabel = new Label(text("codeTextfieldTitle"))
       codeLabel.xAlignment = Alignment.Left
       codeLabel.foreground = Color.WHITE
       codeLabel.font = new Font(codeLabel.font.getName, Font.BOLD, 18)
@@ -206,20 +206,20 @@ trait GUIs { this: MVC =>
         runButton.enabled = locked
 
         pauseButton.text =
-          if (model.state == Paused) "Continuer..."
-          else "Arrêter..."
+          if (model.state == Paused) text("continueButton")
+          else text("stopButton")
         pauseButton.enabled = locked
 
         resetButton.enabled = locked
 
         if (model.simpleMode) {
           simpleMode.selected = true
-          statusTitle.text = "Temps restant"
+          statusTitle.text = text("remainingTimeText")
           scoreTitle.text = ""
         } else{
           advancedMode.selected = true
-          statusTitle.text = "Vies restantes"
-          scoreTitle.text  = "Score: "+model.counters('score);
+          statusTitle.text = text("remainingLifesText")
+          scoreTitle.text  = text("scoreText") +": "+model.counters('score);
         }
 
         scoreTitle.repaint()

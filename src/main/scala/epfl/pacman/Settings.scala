@@ -50,7 +50,15 @@ object Settings {
                       "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
                       "loinDesMonstres", "versUnMonstre", "loinDesPoints", "versUnPoint",
                       "loinDesCerises", "versUneCerise", "loinDePacMan", "versPacMan",
-                      "enSécuritéPendant", "enSecuritePendant")
+                      "enSécuritéPendant", "enSecuritePendant") :::
+                 List("move", "stay", "to", "suchThat",
+                      "when", "ifHunter", "ifHunted", "ifMonstersFar", "ifMonsterClose", "ifMonstersClose",
+                      "alternate", "randomly", "otherwise", "orElse",
+                      "right", "left", "up", "down", "forward",
+                      "distanceToCherry", "distanceToPoint", "distanceToMonster",
+                      "farFromMonsters", "toAMonster", "farFromPoints", "toAPoint",
+                      "farFromCherries", "toACherry", "farFromPacMan", "toPacMan",
+                      "inSecurityFor")
 
   /** Convert seconds to ticks */
   private def ticks(s: Int) = s * 1000 / sleepTime

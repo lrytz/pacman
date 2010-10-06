@@ -158,6 +158,69 @@ abstract class Behavior {
 
 
 
+    /**
+     * ENGLISH DSL
+     */
+    val move = bouge
+    val Move = bouge
+    val stay = reste
+    val Stay = reste
+
+
+    // CONDITIONS
+
+    def when(cond: => Boolean)(body: => Directions): Condition = si(cond)(body)
+
+    def ifHunter = siChasseur
+    def ifHunted = siChasse
+
+    def ifMonsterClose  = siMonstrePres
+    def ifMonstersClose = siMonstrePres
+    def ifMonstersFar   = siMonstresLoin
+    def ifMonsterFar    = siMonstresLoin
+
+    def alternate(weight: Int) = alterner(weight)
+
+    def randomly = auHasard
+
+
+    // DISTANCES
+
+    def distanceToCherry = distanceVersCerise
+    def distanceToPoint = distanceVersPoint
+    def distanceToMonster = distanceVersMonstre
+
+
+    // FILTERS
+
+    def right(ds: Directions): Directions = aDroite(ds)
+    def left(ds: Directions): Directions = aGauche(ds)
+    def up(ds: Directions): Directions = enHaut(ds)
+    def down(ds: Directions): Directions = enBas(ds)
+
+    def forward(ds: Directions): Directions = enAvant(ds)
+
+    def toPosition(p: Position)(ds: Directions): Directions = versPos(p)(ds)
+
+    def cornerUpLeft = coinHautGauche
+    def cornerUpRight = coinHautDroite
+    def cornerDownRight  = coinBasDroite
+    def cornerDownLeft  = coinBasGauche
+
+    def toAMonster(ds: Directions): Directions = versUnMonstre(ds)
+    def farFromMonsters(ds: Directions): Directions = loinDesMonstres(ds)
+    def toAPoint(ds: Directions): Directions = versUnPoint(ds)
+    def farFromPoints(ds: Directions): Directions = loinDesPoints(ds)
+    def toACherry(ds: Directions): Directions = versUneCerise(ds)
+    def farFromCherries(ds: Directions): Directions = loinDesCerises(ds)
+    def toPacMan(ds: Directions): Directions = versPacMan(ds)
+    def farFromPacMan(ds: Directions): Directions = loinDePacMan(ds)
+
+    def toPacManWithoutMonsterOnWay(ds: Directions): Directions = versPacManSansMonstreSurLeChemin(ds)
+
+    def inSecurityFor(n: Int)(ds: Directions): Directions = enSecuritePendant(n)(ds)
+
+
 
     /**
      * Internal stuff
@@ -261,18 +324,24 @@ abstract class Behavior {
   }
 
   case class Directions(dirs: Set[Direction]) {
+    def telQue(cond: Filter) = cond(this)
 
-     def telQue(cond: Filter) = cond(this)
-     def vers(cond: Filter) = telQue(cond)
+    def vers(cond: Filter) = telQue(cond)
 
-     def ouAlors(body: => Directions) = {
-        if (!dirs.isEmpty) {
-            this
-        } else {
-            body
-        }
-     }
-     def sinon(body: => Directions) = ouAlors(body)
+    def ouAlors(body: => Directions) = {
+      if (!dirs.isEmpty) {
+        this
+      } else {
+        body
+      }
+    }
+
+    def sinon(body: => Directions) = ouAlors(body)
+
+    def suchThat(cond: Filter) = telQue(cond)
+    def to(cond: Filter) = suchThat(cond)
+    def orElse(body: => Directions) = ouAlors(body)
+    def otherwise(body: => Directions) = ouAlors(body)
   }
 
   object NoDirections extends Directions(Set())

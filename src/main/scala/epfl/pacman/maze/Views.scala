@@ -60,13 +60,13 @@ trait Views { this: MVC =>
         g.fillRect(0, 0, width, height)
 
         val msg = model.state match {
-          case Paused => "Jeu arrêté."
-          case Loading(_) => "Traduction des ordres..."
-          case GameOver(_) => "Perdu :-("
-          case GameWon(_) if model.simpleMode => "Bravo! Tu as gagné le badge."
-          case GameWon(_) => "Bravo! Tu as gagné le jeu."
-          case LifeLost(_) => "Une vie perdue."
-          case CompileError(_) => "Le code est faux :-("
+          case Paused => text("gameStoppedText")
+          case Loading(_) => text("compilingText")
+          case GameOver(_) => text("lostText")
+          case GameWon(_) if model.simpleMode => text("simpleWonText")
+          case GameWon(_) => text("advancedWonText")
+          case LifeLost(_) => text("lifeLostText")
+          case CompileError(_) => text("codeErrorText")
         }
 
         val font = new Font("Dialog", Font.BOLD, 24)
