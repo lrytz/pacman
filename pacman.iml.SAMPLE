@@ -4,7 +4,7 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Global" />
-        <option name="compilerLibraryName" value="scala-2.8.0.final" />
+        <option name="compilerLibraryName" value="scala-2.8.1" />
         <option name="maximumHeapSize" value="1024" />
         <option name="vmOptions" value="-Xms1024m -Xss1m -XX:MaxPermSize=128M -d32 -server -XX:+UseParallelGC" />
       </configuration>
@@ -18,7 +18,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="scala-2.8.0.final" level="application" />
+    <orderEntry type="library" name="scala-2.8.1" level="application" />
   </component>
 </module>
 
