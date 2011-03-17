@@ -47,7 +47,7 @@ object Settings {
                       "si", "siChasseur", "siChassé", "siChasse", "siMonstresLoin", "siMonstrePrès", "siMonstrePres", "siMonstresPrès", "siMonstresPres",
                       "alterner", "auHasard", "sinon", "ouAlors",
                       "àDroite", "aDroite", "àGauche", "aGauche", "enHaut", "enBas", "enAvant",
-                      "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre",
+                      "distanceVersCerise", "distanceVersPoint", "distanceVersMonstre", "distanceDeChasse",
                       "loinDesMonstres", "versUnMonstre", "loinDesPoints", "versUnPoint",
                       "loinDesCerises", "versUneCerise", "loinDePacMan", "versPacMan",
                       "enSécuritéPendant", "enSecuritePendant") :::
@@ -55,7 +55,7 @@ object Settings {
                       "when", "ifHunter", "ifHunted", "ifMonstersFar", "ifMonsterClose", "ifMonstersClose",
                       "alternate", "randomly", "otherwise", "orElse",
                       "right", "left", "up", "down", "forward",
-                      "distanceToCherry", "distanceToPoint", "distanceToMonster",
+                      "distanceToCherry", "distanceToPoint", "distanceToMonster", "huntDistance",
                       "farFromMonsters", "toAMonster", "farFromPoints", "toAPoint",
                       "farFromCherries", "toACherry", "farFromPacMan", "toPacMan",
                       "inSecurityFor")

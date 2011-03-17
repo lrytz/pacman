@@ -61,6 +61,8 @@ abstract class Behavior {
     def distanceVersMonstre =
         distanceTo(Set[Position]() ++ model.monsters.map(_.pos))
 
+    def distanceDeChasse =
+        model.counters('hunter)
 
     // FILTERS
 
@@ -189,6 +191,7 @@ abstract class Behavior {
     def distanceToCherry = distanceVersCerise
     def distanceToPoint = distanceVersPoint
     def distanceToMonster = distanceVersMonstre
+    def huntDistance = distanceDeChasse
 
 
     // FILTERS
