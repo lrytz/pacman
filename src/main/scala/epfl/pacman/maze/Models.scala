@@ -292,6 +292,28 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
               (for(y <- 15 to 17; x <- 21 to 22)  yield w(x, y))
     }
 */
+/*
+XXXXXXXXXXXXXXXXXXX.
+X        X        X.
+X XX XXX X XXX XX X.
+X XX XXX X XXX XX X.
+X                 X.
+X XX X XXXXX X XX X.
+X    X   X   X    X.
+X XX XXX X XXX XXXX.
+X XX X       X XXXX.
+       XXXXX       .
+XXXX X       X XX X.
+XXXX X XXXXX X XX X.
+X        X        X.
+X XX XXX X XXX XX X.
+X  X           X  X.
+XX X X XXXXX X X XX.
+X    X   X   X    X.
+X XX XXX X XXX XX X.
+X                 X.
+XXXXXXXXXXXXXXXXXXX""".split(".\n").tail
+*/
 
     val maze: Set[Wall] = {
       val lines =""".
