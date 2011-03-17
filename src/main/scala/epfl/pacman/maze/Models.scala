@@ -326,7 +326,7 @@ X RRR R   RRR R   X.
 X R   R   R   R   X.
 X R   R   R   R   X.
 X RRR R   R   RRR X.
-                  X.
+                   .
 XXXX X       X XX X.
 XXXX X XXXXX X XX X.
 X        X        X.
