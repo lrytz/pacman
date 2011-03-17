@@ -82,6 +82,7 @@ trait Thingies { this: Models =>
 
   case object BlueWall extends WallType
   case object RedWall  extends WallType
+  case object NoWall   extends WallType
 
 
   /**

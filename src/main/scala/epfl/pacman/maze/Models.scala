@@ -16,7 +16,7 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
 
   case class Model(pacman: PacMan = ModelDefaults.pacman,
                    monsters: Set[Monster] = ModelDefaults.monsters,
-                   walls: Set[Wall] = ModelDefaults.maze,
+                   walls: Set[Wall] = ModelDefaults.mazeWalls,
                    points: Set[Thingy] = Set(),
                    deadMonsters: Set[Monster] = Set(),
                    counters: Counters = new Counters(),
@@ -296,15 +296,15 @@ trait Models extends Thingies with Positions with Directions { this: MVC =>
     val maze: Set[Wall] = {
       val lines =""".
 XXXXXXXXXXXXXXXXXXX.
-X        X        X.
-X XX XXX X XXX XX X.
-X XX XXX X XXX XX X.
 X                 X.
-X XX X XXXXX X XX X.
-X    X   X   X    X.
-X XX XXX X XXX XXXX.
-X XX X       X XXXX.
-       XXXXX       .
+X RRR RRR RRR R   X.
+X R   RNR R   R   X.
+X R   RRR R   R   X.
+X RRR R   RRR R   X.
+X R   R   R   R   X.
+X R   R   R   R   X.
+X RRR R   R   RRR X.
+                  X.
 XXXX X       X XX X.
 XXXX X XXXXX X XX X.
 X        X        X.
@@ -316,10 +316,12 @@ X XX XXX X XXX XX X.
 X                 X.
 XXXXXXXXXXXXXXXXXXX""".split(".\n").tail
 
-      Set() ++ { for ((line, y) <- lines.zipWithIndex; (char, x) <- line.zipWithIndex if (char == 'X' || char == 'R'))
-        yield (Wall(new BlockPosition(x, y), if(char == 'R') RedWall else BlueWall))
+      Set() ++ { for ((line, y) <- lines.zipWithIndex; (char, x) <- line.zipWithIndex if (char == 'X' || char == 'R' || char == 'N'))
+        yield (Wall(new BlockPosition(x, y), char match { case 'R' => RedWall; case 'X' => BlueWall; case 'N' => NoWall }))
       }
     }
+
+    val mazeWalls = maze filter(w => w.tpe != NoWall)
 
     def points: Set[Thingy] = {
       import scala.util.Random.nextInt
