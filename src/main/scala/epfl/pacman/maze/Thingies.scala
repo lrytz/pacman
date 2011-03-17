@@ -76,7 +76,12 @@ trait Thingies { this: Models =>
    * Walls
    */
 
-  case class Wall(pos: Position) extends Thingy
+  case class Wall(pos: Position, tpe: WallType = BlueWall) extends Thingy
+
+  sealed abstract class WallType
+
+  case object BlueWall extends WallType
+  case object RedWall  extends WallType
 
 
   /**

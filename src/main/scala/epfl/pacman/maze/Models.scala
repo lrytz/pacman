@@ -316,8 +316,8 @@ X XX XXX X XXX XX X.
 X                 X.
 XXXXXXXXXXXXXXXXXXX""".split(".\n").tail
 
-      Set() ++ { for ((line, y) <- lines.zipWithIndex; (char, x) <- line.zipWithIndex if char == 'X')
-        yield (Wall(new BlockPosition(x, y)))
+      Set() ++ { for ((line, y) <- lines.zipWithIndex; (char, x) <- line.zipWithIndex if (char == 'X' || char == 'R'))
+        yield (Wall(new BlockPosition(x, y), if(char == 'R') RedWall else BlueWall))
       }
     }
 

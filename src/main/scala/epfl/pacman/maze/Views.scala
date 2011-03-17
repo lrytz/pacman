@@ -169,7 +169,7 @@ trait Views { this: MVC =>
 
     def drawWall(w: Wall, g: Graphics2D) = {
       // Based on the walls around, draw differently
-      g.setColor(Color.CYAN)
+      g.setColor(if (w.tpe == BlueWall) Color.CYAN else Color.PINK)
       val x = toAbs(w.pos.x)
       val y = toAbs(w.pos.y)
 
@@ -198,7 +198,7 @@ trait Views { this: MVC =>
         rborder = 3
       }
 
-      g.setColor(Color.BLUE)
+      g.setColor(if (w.tpe == BlueWall) Color.BLUE else Color.RED)
       for (i <- tborder to blockSize-bborder by 5) {
         g.drawLine(x+lborder, y + i, x+blockSize-rborder, y + i)
       }
